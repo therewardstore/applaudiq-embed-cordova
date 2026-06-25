@@ -1,0 +1,13 @@
+# build output
+dist/
+
+# deps
+node_modules/
+# a published library doesn't ship or need a committed lockfile (it's not in `files`).
+package-lock.json
+yarn.lock
+
+# misc
+.DS_Store
+*.log
+*.tgz

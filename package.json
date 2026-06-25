@@ -1,0 +1,59 @@
+{
+  "name": "@applaudiq/embed-cordova",
+  "version": "1.1.1",
+  "description": "Cordova / PhoneGap SDK to embed the Applaud IQ recognition portal (auto + manual login, native SSO). Works with plain Cordova and legacy Ionic React/Angular/Vue on Cordova.",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "source": "src/index.ts",
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "prepare": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "typecheck": "tsc --noEmit",
+    "release": "release-it"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "cordova",
+    "phonegap",
+    "ionic",
+    "applaudiq",
+    "embed",
+    "sso",
+    "recognition",
+    "webview"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/therewardstore/applaudiq-embed-cordova.git"
+  },
+  "homepage": "https://github.com/therewardstore/applaudiq-embed-cordova#readme",
+  "bugs": {
+    "url": "https://github.com/therewardstore/applaudiq-embed-cordova/issues"
+  },
+  "author": "Arulraj V <abofficial1997@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "release-it": "^17.10.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  }
+}
