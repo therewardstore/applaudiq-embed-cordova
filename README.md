@@ -21,7 +21,7 @@ Android **Back** button go through Cordova's native plugins.
 ## 1. Install
 
 ```bash
-npm install @applaudiq/embed-cordova@^1.1.1
+npm install @applaudiq/embed-cordova@^1.2.0
 cordova plugin add cordova-plugin-inappbrowser cordova-plugin-customurlscheme
 ```
 
@@ -111,10 +111,17 @@ opens the IdP in the **system browser** (`cordova-plugin-inappbrowser` `open(url
 one-time code to `<ssoCallback>?code=` (or `?error=`), `cordova-plugin-customurlscheme`'s `window.handleOpenURL`
 catches it, and the SDK relays it into the embed, which redeems it and reloads — signed in.
 
+## Downloads & external links
+
+When the portal (or the reward store nested inside it) needs to open a URL outside the WebView —
+a file download, a payment page, or an OAuth handoff — it sends the `applaudiq:open-external` bridge
+message with payload `{ url }`. The SDK opens `http(s)` URLs in the **system browser**
+(`cordova-plugin-inappbrowser` `open(url, '_system')`). No app code is required.
+
 ## Test integration
 
 A runnable example ships for each framework in
 [`applaudiq-sdk-example`](https://github.com/therewardstore/applaudiq-sdk-example) under
 `native-integration/cordova/` (vanilla · react · angular · vue · ionic-react · ionic-angular · ionic-vue).
 
-Latest: **v1.1.1 (LTS)**. See [CHANGELOG.md](./CHANGELOG.md). MIT licensed.
+Latest: **v1.2.0 (LTS)**. See [CHANGELOG.md](./CHANGELOG.md). MIT licensed.

@@ -1,6 +1,6 @@
 {
   "name": "@applaudiq/embed-cordova",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Cordova / PhoneGap SDK to embed the Applaud IQ recognition portal (auto + manual login, native SSO). Works with plain Cordova and legacy Ionic React/Angular/Vue on Cordova.",
   "type": "module",
   "main": "dist/index.cjs",

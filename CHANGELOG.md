@@ -7,6 +7,12 @@ All notable changes to `@applaudiq/embed-cordova` are documented here. This proj
 
 _Nothing yet._
 
+## [1.2.0] — LTS
+
+**Reward-store downloads / external links.** The SDK now handles the `applaudiq:open-external` bridge message
+(payload `{ url }`) and opens the URL in the device's system browser — used by the embedded portal for file
+downloads, payment pages, and OAuth handoffs. Backward-compatible; no changes to the public API surface.
+
 ## [1.1.1] — LTS
 
 **First release of the Cordova SDK.** Joins the unified **1.1.1 LTS** Applaud IQ embed-SDK family (Web · iOS ·
