@@ -33,12 +33,33 @@ interface CordovaInAppBrowser {
 interface CordovaGlobal {
   platformId?: string; // 'ios' | 'android' | 'browser' | …
   InAppBrowser?: CordovaInAppBrowser;
+  /** From `cordova-plugin-file` (OPTIONAL — only for voucher downloads). */
+  file?: { cacheDirectory?: string };
+}
+/** From `cordova-plugin-x-socialsharing` (OPTIONAL — only for voucher downloads). */
+interface CordovaSocialSharing {
+  share(
+    message: string | null,
+    subject: string | null,
+    file: string | string[] | null,
+    url: string | null,
+    onSuccess?: () => void,
+    onError?: (err: unknown) => void,
+  ): void;
 }
 declare global {
   interface Window {
     cordova?: CordovaGlobal;
     /** Set by `cordova-plugin-customurlscheme`; called when the app opens via its custom scheme. */
     handleOpenURL?: (url: string) => void;
+    /** From `cordova-plugin-file` (OPTIONAL). */
+    resolveLocalFileSystemURL?: (
+      url: string,
+      success: (entry: unknown) => void,
+      error?: (err: unknown) => void,
+    ) => void;
+    /** From `cordova-plugin-x-socialsharing` (OPTIONAL). */
+    plugins?: { socialsharing?: CordovaSocialSharing };
   }
 }
 
@@ -109,6 +130,7 @@ const MSG = {
   ssoRequest: 'applaudiq:sso-request',
   ssoResult: 'applaudiq:sso-result',
   openExternal: 'applaudiq:open-external',
+  saveFile: 'applaudiq:save-file',
   back: 'applaudiq:back',
 } as const;
 
@@ -133,6 +155,81 @@ function openSystemBrowser(url: string): void {
   } catch {
     /* no-op */
   }
+}
+
+/**
+ * Save base64 file bytes to the app cache and open the OS share sheet — reward-store voucher download.
+ * Requires the app to have installed `cordova-plugin-file` + `cordova-plugin-x-socialsharing`; if either
+ * is absent this is a silent no-op (best-effort, never throws).
+ */
+function saveFileViaCordova(base64: string, filename: string, mime: string): void {
+  const w = typeof window !== 'undefined' ? window : undefined;
+  const cacheDir = w?.cordova?.file?.cacheDirectory;
+  const resolveFs = w?.resolveLocalFileSystemURL;
+  const sharing = w?.plugins?.socialsharing;
+  if (!w || !cacheDir || typeof resolveFs !== 'function' || typeof sharing?.share !== 'function') {
+    return; // required plugins not installed — skip
+  }
+  let blob: Blob;
+  try {
+    const bin = atob(base64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+    blob = new Blob([bytes], { type: mime || 'application/octet-stream' });
+  } catch {
+    return; // malformed base64
+  }
+  resolveFs(
+    cacheDir,
+    (dirEntry: unknown) => {
+      // cordova-plugin-file uses the legacy callback FileSystem API; entries are loosely typed.
+      const getFile = (dirEntry as { getFile?: unknown })?.getFile as
+        | ((
+            name: string,
+            opts: { create: boolean; exclusive: boolean },
+            success: (fileEntry: unknown) => void,
+            error?: (err: unknown) => void,
+          ) => void)
+        | undefined;
+      if (typeof getFile !== 'function') return;
+      getFile(
+        filename,
+        { create: true, exclusive: false },
+        (fileEntry: unknown) => {
+          const fe = fileEntry as {
+            createWriter?: (
+              success: (writer: {
+                onwriteend?: () => void;
+                onerror?: () => void;
+                write: (data: Blob) => void;
+              }) => void,
+              error?: (err: unknown) => void,
+            ) => void;
+            toURL?: () => string;
+          };
+          fe.createWriter?.((writer) => {
+            writer.onwriteend = () => {
+              const fileUrl = typeof fe.toURL === 'function' ? fe.toURL() : '';
+              if (!fileUrl) return;
+              try {
+                sharing.share(null, filename, fileUrl, null);
+              } catch {
+                /* share failed / cancelled — best-effort */
+              }
+            };
+            writer.onerror = () => {};
+            try {
+              writer.write(blob);
+            } catch {
+              /* write failed */
+            }
+          });
+        },
+        () => {},
+      );
+    },
+    () => {},
+  );
 }
 
 // ---- pure URL/parse helpers (mirror the Capacitor / iOS / Android / RN SDKs) ------------------
@@ -564,6 +661,17 @@ class ApplaudIQClient {
           // Reward-store downloads / payment / OAuth: open the URL in the system browser.
           const url = typeof d.payload?.url === 'string' ? d.payload.url : '';
           if (/^https?:\/\//i.test(url)) openSystemBrowser(url);
+          break;
+        }
+        case MSG.saveFile: {
+          // Reward-store voucher download: the embed streamed the file bytes (base64) because a blob
+          // download can't reach disk inside the framed WebView. Save + share via the OPTIONAL
+          // cordova-plugin-file + cordova-plugin-x-socialsharing — no-op if the app didn't install them.
+          const base64 = typeof d.payload?.base64 === 'string' ? d.payload.base64 : '';
+          const rawName = typeof d.payload?.filename === 'string' ? d.payload.filename : 'download';
+          const filename = rawName.split(/[\\/]/).pop() || 'download'; // basename only (no path traversal)
+          const mime = typeof d.payload?.mime === 'string' ? d.payload.mime : 'application/octet-stream';
+          if (base64) saveFileViaCordova(base64, filename, mime);
           break;
         }
       }

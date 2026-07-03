@@ -21,7 +21,7 @@ Android **Back** button go through Cordova's native plugins.
 ## 1. Install
 
 ```bash
-npm install @applaudiq/embed-cordova@^1.2.0
+npm install @applaudiq/embed-cordova@^1.3.0
 cordova plugin add cordova-plugin-inappbrowser cordova-plugin-customurlscheme
 ```
 
@@ -118,10 +118,20 @@ a file download, a payment page, or an OAuth handoff — it sends the `applaudiq
 message with payload `{ url }`. The SDK opens `http(s)` URLs in the **system browser**
 (`cordova-plugin-inappbrowser` `open(url, '_system')`). No app code is required.
 
+The reward store's **gift-card voucher download** additionally sends `applaudiq:save-file` with
+`{ base64, filename, mime }`. To enable it, add the two **optional** plugins to your app:
+
+```bash
+cordova plugin add cordova-plugin-file cordova-plugin-x-socialsharing
+```
+
+The SDK writes the file to the app cache and opens the OS share sheet. Without these plugins, voucher
+downloads are a silent no-op.
+
 ## Test integration
 
 A runnable example ships for each framework in
 [`applaudiq-sdk-example`](https://github.com/therewardstore/applaudiq-sdk-example) under
 `native-integration/cordova/` (vanilla · react · angular · vue · ionic-react · ionic-angular · ionic-vue).
 
-Latest: **v1.2.0 (LTS)**. See [CHANGELOG.md](./CHANGELOG.md). MIT licensed.
+Latest: **v1.3.0 (LTS)**. See [CHANGELOG.md](./CHANGELOG.md). MIT licensed.
