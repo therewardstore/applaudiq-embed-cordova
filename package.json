@@ -26,7 +26,8 @@
     "build": "tsup src/index.ts --format esm,cjs --dts --clean",
     "prepare": "tsup src/index.ts --format esm,cjs --dts --clean",
     "typecheck": "tsc --noEmit",
-    "release": "release-it"
+    "release": "release-it",
+    "audit:deps": "pnpm audit --audit-level=moderate"
   },
   "publishConfig": {
     "access": "public"
@@ -54,6 +55,8 @@
   "devDependencies": {
     "release-it": "^17.10.0",
     "tsup": "^8.0.0",
-    "typescript": "^5.4.0"
-  }
+    "typescript": "^5.4.0",
+    "husky": "^9.1.7"
+  },
+  "packageManager": "pnpm@9.15.0"
 }

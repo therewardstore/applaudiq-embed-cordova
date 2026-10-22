@@ -1,0 +1,29 @@
+---
+description: Always-on project rules for this repo (points at CLAUDE.md)
+alwaysApply: true
+---
+
+**friday · applaudiq-embed-cordova** — default branch `master` · Orbit workspace. Every request here is a change and follows
+`.claude/skills/flow/SKILL.md` automatically (`TASK_MODE=auto`: no `/task` needed):
+decide where (root or repo) and the work type (hotfix | change | new), plan by type, build, gate
+(`bash scripts/agent/gates.sh task <risk>`), then **ask before any commit** — never commit, push
+or skip a hook without the developer's reply. Missing repo, ticket or type → **ask one question with
+options**, never guess (a branch is `<TICKET>-slug`). On every line you add:
+comments at most 2 lines and ≤100 characters, saying why; a linter directive is one line,
+`// eslint-disable-next-line <rule> -- <why>`, never a block or `@ts-ignore` (`scripts/agent/scan-diff.sh` enforces all of it). No `scan-check:` line in your
+context → run `bash scripts/agent/session-check.sh` first. Rules: CLAUDE.md § Rules · gates: docs/GATES.md.
+Orbit workspace: repos live beside `orbit/`; every commit runs friday's gates, then Orbit's (branch,
+header, change record at push). Work spanning repos starts at the workspace root with `./orbit work`.
+
+Read first, in full:
+- `CLAUDE.md` (the rules, the skills table, the gates)
+- `docs/README.md` (the docs index) → `docs/GATES.md`, `docs/TOOLS.md`
+- the skills in `.claude/skills/` the change touches, in full
+- `CLAUDE.md` at the repo root is the always-on doc for this repo. Read it and follow it.
+  Where it and a skill in `.claude/skills/` disagree, the skill wins.
+- If your context has no line starting with `scan-check:`, run
+  `bash scripts/agent/session-check.sh` before your first action in this chat, and report
+  any drift it prints. (The sessionStart hook normally supplies it, but Cursor can drop it.)
+- The skills are the real files, linked under `.cursor/skills/` and inlined by `.cursor/rules/skills.mdc`;
+  `/flow` runs for every request when `TASK_MODE=auto`, `/scan` once per session, `/review` on demand.
+- Commits and branches follow `.cursor/rules/commits-and-branches.mdc`.

@@ -1,0 +1,21 @@
+# Orbit's hook shim, one file per hook under .orbit-hooks/ (core.hooksPath=.orbit-hooks).
+# Contract friday relies on: run this repo's gates ONCE with the stage named, forward stdin
+# (pre-push's ref lines) through a file, and only then run Orbit's own gates. Exit codes pass
+# through: 1 policy · 2 bad input · 3 a gate could not run. The ::friday::gate and
+# ::friday::verdict lines on stdout are what Orbit writes into the change record.
+# The real files live in the orbit repo (hooks/); `orbit hooks install` copies them here. A repo
+# joins with: trs-app agents upgrade --orbit 1 --hooks orbit --repo-name <name> --jira-project <KEY>
+#
+# .orbit-hooks/pre-push
+#!/usr/bin/env bash
+set -uo pipefail
+ROOT="${ORBIT_ROOT:-<the folder with orbit.json, up to four levels above this repo>}"
+refs="$(mktemp)"; trap 'rm -f "$refs"' EXIT
+cat > "$refs"
+if [ -f scripts/agent/gates.sh ]; then
+  FRIDAY_PUSH_REFS="$refs" ORBIT_STAGE=pre-push bash scripts/agent/gates.sh < "$refs" || exit $?
+fi
+node "$ROOT/bin/orbit.js" hook pre-push --refs "$refs" --remote "${1:-origin}"
+#
+# .orbit-hooks/pre-commit:  ORBIT_STAGE=pre-commit bash scripts/agent/gates.sh || exit $?; exec node "$ROOT/bin/orbit.js" hook pre-commit
+# .orbit-hooks/commit-msg:  bash scripts/git/prepare-commit-msg.sh "$1" && bash scripts/git/check-commit-msg.sh "$1" || exit $?; exec node "$ROOT/bin/orbit.js" hook commit-msg "$1"

@@ -11,3 +11,9 @@ yarn.lock
 .DS_Store
 *.log
 *.tgz
+
+# Private QA notes, personal agent settings, upgrade backups and task state — never committed.
+.qa/
+.claude/settings.local.json
+.friday-backup/
+scripts/agent/state/

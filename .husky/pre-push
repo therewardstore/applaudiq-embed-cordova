@@ -1,0 +1,3 @@
+# The complete local set, cheapest first: branch and commit checks, docs, then
+# the whole-tree gates. Stages live in scripts/agent/gates.sh (docs/GATES.md).
+bash scripts/agent/gates.sh pre-push

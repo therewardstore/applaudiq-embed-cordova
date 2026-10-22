@@ -1,0 +1,3 @@
+# Fills in the branch ticket for messages written in an editor, then checks the result.
+bash scripts/git/prepare-commit-msg.sh "$1"
+bash scripts/git/check-commit-msg.sh "$1"
