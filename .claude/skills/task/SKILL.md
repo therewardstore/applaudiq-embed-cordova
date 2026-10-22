@@ -73,7 +73,7 @@ connected` and continue.
 - **Effects and memos** list only the values they really read: never a dependency added to satisfy
   a lint rule, never one rebuilt every render (an object literal, an unmemoised selector result).
   `exhaustive-deps` is off on purpose; check a new memo once with
-  `npx eslint --rule '{"react-hooks/exhaustive-deps":"error"}' <file>` and keep what matters.
+  `pnpm exec eslint --rule '{"react-hooks/exhaustive-deps":"error"}' <file>` and keep what matters.
 - **Comments** say why, never what: at most 2 lines; a directive is one line,
   `// eslint-disable-next-line <rule> -- <why>`, never a block or `@ts-ignore`.
 - Update the docs `scripts/git/doc-map.txt` maps to the touched code, or give that commit a

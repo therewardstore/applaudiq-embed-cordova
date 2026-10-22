@@ -3,7 +3,6 @@
   "kind": "sdk",
   "pm": "pnpm",
   "node": "22.14.0",
-  "port": 3000,
   "profile": "gates-only",
   "branches": {
     "default": "master",
@@ -28,6 +27,6 @@
     "build",
     "typecheck"
   ],
-  "friday": "0.7.13",
+  "friday": "0.7.17",
   "modules": []
 }

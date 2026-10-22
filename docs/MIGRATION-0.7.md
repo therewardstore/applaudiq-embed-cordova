@@ -24,6 +24,6 @@ Written once by `trs-app agents upgrade`; edit or delete it when the team has re
 `trs-app agents upgrade --rollback <stamp>` restores the files this run changed from
 `.friday-backup/<stamp>/` and the previous manifest. The last resort is the friday release this repo had
 before (its version is in `scripts/agent/agent.manifest` in git history):
-`npx @therewardstore/create-app@<that version> agents-init`. The repo's own values (caps, comment length,
+`pnpm dlx @therewardstore/create-app@<that version> agents-init`. The repo's own values (caps, comment length,
 default branch) were kept by the upgrade; `trs-app agents upgrade --comment-lines 2 --file-cap 2000`
 adopts the 0.7 policy when the team is ready.

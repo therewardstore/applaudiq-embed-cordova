@@ -20,8 +20,11 @@ Android **Back** button go through Cordova's native plugins.
 
 ## 1. Install
 
+In a pnpm app, put `node-linker=hoisted` in its `.npmrc` before installing: the Cordova CLI runs npm itself, and
+npm cannot read pnpm's default (isolated) `node_modules`.
+
 ```bash
-npm install @applaudiq/embed-cordova@^1.3.0
+pnpm add @applaudiq/embed-cordova@^1.3.0
 cordova plugin add cordova-plugin-inappbrowser cordova-plugin-customurlscheme
 ```
 
