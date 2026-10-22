@@ -77,7 +77,25 @@ and `.agents/rules/project.md`; don't copy it into any of them.
 
 `pnpm typecheck` · `pnpm build` · `pnpm run audit:deps`. Pre-commit runs the code rules on the staged lines → the file cap → typecheck; pre-push runs branch name → commits being pushed → docs moved → typecheck → build → dependency audit. The full table, and
 what each gate proves: `docs/GATES.md`.
-
-In this Orbit workspace a `pnpm install` runs husky (`prepare`), which points git at `.husky/_` and
-bypasses Orbit's gates: run `./orbit hooks install applaudiq-embed-cordova` from `orbit/` afterwards.
 <!-- friday:agents:end -->
+
+## Releasing (master only changes through a pull request)
+
+`.release-it.json` tags, pushes and publishes nothing by default, so a bare `pnpm release` is always safe.
+
+1. On the ticket branch `./orbit work` made (it tracks `origin/master`, which release-it requires): move
+   `## [Unreleased]` in CHANGELOG.md under the new version and commit it (release-it wants a clean tree), then
+   `pnpm release` bumps `package.json`, builds and commits `chore: release x.y.z`; the commit hook adds the
+   branch's ticket. Push the branch and open the PR.
+2. After the PR merges, on `master` after `git pull`, while `git log -1` is still the commit that PR landed as (if
+   another PR merged since, stop: the tag would land on a later commit): `pnpm release --no-increment --no-git.commit
+   --git.tag --npm.publish --git.requireBranch=master` tags `vx.y.z` on it and publishes to npm, then
+   `git push origin vx.y.z` pushes the tag.
+
+## Dependency audit exceptions
+
+`pnpm run audit:deps` runs at pre-push. Every advisory here is in a devDependency (release, build or
+type-check tooling); the package has no runtime `dependencies`, so nothing reaches consumers.
+`pnpm.overrides` in `package.json` pins the patched versions of the fixable ones, and
+`pnpm.auditConfig.ignoreGhsas` lists only those with no fix anywhere: `braces` (GHSA-vfj7-8cjw-p6xm, no fixed version). Drop an override or an
+exception as soon as an upgrade of its parent (`release-it`) makes it unnecessary.
