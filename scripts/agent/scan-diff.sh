@@ -29,8 +29,10 @@ leading_comment='^[[:space:]]*(\{/\*.*\*/\}|/\*.*\*/)[[:space:]]*'
 
 errors=0
 warnings=0
+progress_tty=""
 report() {
   local level="$1" file="$2" line="$3" rule="$4" text="$5"
+  [ -z "$progress_tty" ] || printf '\r\033[K' >&2
   printf '%s %s:%s  %s\n      %s\n' "$level" "$file" "$line" "$rule" "$(printf '%s' "$text" | sed 's/^[[:space:]]*//' | cut -c1-110)"
   if [ "$level" = "✖" ]; then errors=$((errors + 1)); else warnings=$((warnings + 1)); fi
 }
@@ -144,7 +146,26 @@ classify_file() {
   printf '%s\n' "$f" | grep -qE "$ROUTES_FILE_RE" && in_routes=1
   printf '%s\n' "$f" | grep -qE "$API_FILE_RE" && in_api=1
 }
+# A diff of thousands of added lines takes minutes here, so it says how far it has got (stderr): in
+# place on a terminal, a line per 10% in CI. SCAN_PROGRESS_MIN is the size that turns it on.
+total_lines="$(awk '/^\+\+\+ / { next } /^\+/ { n++ } END { print n + 0 }' "$patch")"
+progress_every=0; scanned=0; SECONDS=0
+if [ "$total_lines" -ge "${SCAN_PROGRESS_MIN:-2000}" ]; then
+  if [ -t 2 ]; then progress_tty=1; progress_every=100; else progress_every=$(( (total_lines + 9) / 10 )); fi
+fi
+progress() {
+  local left="" rest start="" end=$'\n'
+  [ -z "$progress_tty" ] || { start=$'\r\033[K'; end=""; }
+  if [ "$scanned" -lt "$total_lines" ] && [ "$SECONDS" -gt 0 ]; then
+    rest=$(( SECONDS * (total_lines - scanned) / scanned ))
+    if [ "$rest" -ge 60 ]; then left=", ~$(( rest / 60 ))m left"; else left=", ~${rest}s left"; fi
+  fi
+  printf '%s  code rules: %d/%d added lines (%d%%), %dm%02ds%s%s' "$start" "$scanned" "$total_lines" \
+    $(( scanned * 100 / total_lines )) $(( SECONDS / 60 )) $(( SECONDS % 60 )) "$left" "$end" >&2
+}
 while IFS=$'\t' read -r file line run text; do
+  scanned=$((scanned + 1))
+  [ "$progress_every" -eq 0 ] || [ $(( scanned % progress_every )) -ne 0 ] || progress
   if [ "$file" != "$last_file" ]; then classify_file "$file"; last_file="$file"; fi
   [ "$file_kind" != skip ] || continue
   if [ "$file_kind" = style ]; then
@@ -213,6 +234,7 @@ done < <(awk '
     n++; next
   }
 ' "$patch")
+[ -z "$progress_tty" ] || printf '\r\033[K' >&2
 
 if [ "$errors" -eq 0 ] && [ "$warnings" -eq 0 ]; then
   echo "scan-diff: clean"
