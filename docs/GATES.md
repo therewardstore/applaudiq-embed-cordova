@@ -10,7 +10,7 @@ disagree, the skill wins.
 |---|---|---|
 | pre-commit | the code rules on the staged lines (`scan-diff.sh --cached`) → the file cap (`bash scripts/git/check-file-cap.sh`) → `pnpm typecheck` | staged files, then the whole tree's types |
 | commit-msg | the branch ticket filled in (`prepare-commit-msg.sh`), then the header format, ticket match, no attribution trailers or bot identity (`check-commit-msg.sh`) | the message |
-| pre-push | branch name (`check-branch.sh`) → commits being pushed (`check-commit-range.sh`) → docs moved (`check-docs-moved.sh`) → `pnpm typecheck` → `pnpm build` → `pnpm run audit:deps` | the branch, new commits, then the tree |
+| pre-push | branch name (`check-branch.sh`) → commits being pushed (`check-commit-range.sh`) → docs moved (`check-docs-moved.sh`) → `pnpm typecheck` → `pnpm build` → `pnpm run audit:deps` → audit exceptions (`audit-check.sh`) | the branch, new commits, then the tree |
 | CI | the `agent-gates` workflow: `bash scripts/agent/gates.sh ci` on the pull request HEAD with the BASE branch's policy, or its own when the base has no `ci` stage yet (branch, commits, secret scan, code rules, cap, docs, lint, types, the full suite, build, size, audit), then the merged result built and tested in `agent-gates-merged`; the AI review is manual (`trs-app ci review <pr>`) | a clean checkout |
 
 ## The lint gate
@@ -23,10 +23,18 @@ This app has no test runner wired into the hooks.
 
 ## The dependency audit
 
-`pnpm run audit:deps` runs last at pre-push, in `/finalize` and in CI. It fails on a moderate-or-worse
-advisory; fix it by upgrading the package, or record why it cannot be reached. It needs the network,
-and a new advisory can turn it red on a branch whose code did not change: that is still a push to
-hold, not a hook to skip.
+`pnpm run audit:deps` runs last at pre-push, in `/finalize` and in CI, then `bash scripts/agent/audit-check.sh`,
+which holds the tree at zero advisories of any severity. Fix one by upgrading its parent, or by a
+`pnpm.overrides` entry when the parent pins a vulnerable line. The one way past it is an advisory no
+release fixes yet: its GHSA id goes in `pnpm.auditConfig.ignoreGhsas` and in a row of
+`docs/AUDIT-EXCEPTIONS.md` with an end date at most 90 days ahead
+(`AUDIT_EXCEPTION_MAX_DAYS`) and the reason it cannot reach users. A fix shipping, the date passing,
+a row missing or the package leaving the tree fails the gate, so the list only ever shrinks. A
+`pnpm.overrides` entry that crosses a breaking line needs a dated row of its own in the same file.
+`.github/workflows/dependency-audit.yml` runs the same check every Monday on the default branch
+and opens one issue (label `dependency-audit`) while it fails; `.github/dependabot.yml` raises the
+security updates. The audit needs the network, and a new advisory can turn it red on a branch whose
+code did not change: that is still a push to hold, not a hook to skip.
 
 ## Ranges and exit codes
 
@@ -103,6 +111,7 @@ diagnosis (cause, `file:line`, the one fix) instead.
 | `pnpm typecheck` | the whole tree typechecks |
 | `pnpm build` | it bundles; a broken dynamic import only fails here |
 | `pnpm run audit:deps` | no dependency has a moderate-or-worse advisory |
+| `bash scripts/agent/audit-check.sh` | no advisory of any severity; each ignored one is an unfixed, dated row in `docs/AUDIT-EXCEPTIONS.md` |
 | `bash scripts/agent/scan-diff.sh <range>` | the code rules on the lines a change adds |
 | `bash scripts/agent/test-changed.sh <range>` | the changed files' own tests |
 | `bash scripts/agent/session-check.sh` | the cheap drift checks, in under a second |

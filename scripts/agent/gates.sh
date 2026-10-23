@@ -121,6 +121,8 @@ release_gates() {
   gate "build" "$GATE_BUILD"
   gate "size budgets" "$GATE_SIZE"
   gate "dependency audit" "$GATE_AUDIT"
+  # Any severity counts; an ignored advisory must be an unfixed, dated exception (audit-check.sh).
+  [ -z "$GATE_AUDIT" ] || gate "audit exceptions" "bash scripts/agent/audit-check.sh"
 }
 full_tests() {
   if [ -z "$GATE_TEST" ]; then echo "▸ tests: disabled (GATE_TEST is empty in scripts/agent/agent.conf)"; return 0; fi

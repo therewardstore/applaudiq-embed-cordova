@@ -75,7 +75,7 @@ and `.agents/rules/project.md`; don't copy it into any of them.
 
 ## Quality gates
 
-`pnpm typecheck` · `pnpm build` · `pnpm run audit:deps`. Pre-commit runs the code rules on the staged lines → the file cap → typecheck; pre-push runs branch name → commits being pushed → docs moved → typecheck → build → dependency audit. The full table, and
+`pnpm typecheck` · `pnpm build` · `pnpm run audit:deps`. Pre-commit runs the code rules on the staged lines → the file cap → typecheck; pre-push runs branch name → commits being pushed → docs moved → typecheck → build → dependency audit → audit exceptions. The full table, and
 what each gate proves: `docs/GATES.md`.
 <!-- friday:agents:end -->
 
@@ -97,8 +97,12 @@ what each gate proves: `docs/GATES.md`.
 `pnpm run audit:deps` runs at pre-push. Every advisory here is in a devDependency (release, build or
 type-check tooling); the package has no runtime `dependencies`, so nothing reaches consumers.
 `pnpm.overrides` in `package.json` pins the patched versions of the fixable ones, and
-`pnpm.auditConfig.ignoreGhsas` lists only those with no fix anywhere: `braces` (GHSA-vfj7-8cjw-p6xm, no fixed version). Drop an override or an
-exception as soon as an upgrade of its parent (`release-it`) makes it unnecessary.
-Two overrides cross a major on purpose, because no release in the old line is fixed: `tmp` 0.0 → 0.2
-(`release-it`'s editor prompt; nothing below 0.2.7 is fixed) and `basic-ftp` 5 → 6 (every 5.x is in
-GHSA-c475-qrg2-pj4r; it is only `release-it`'s proxy agent).
+`pnpm.auditConfig.ignoreGhsas` is empty: every known advisory is fixed. Add an exception there only for an
+advisory with no fix anywhere, say why here, and drop an override or an exception as soon as an upgrade
+of its parent (`release-it`, `tsup`) makes it unnecessary.
+`release-it` stays on 20.x: 21.x needs Node ^22.21 and `.nvmrc` pins 22.14.0 (move both together).
+`undici` is lifted within 7.x to ^7.29.1 (release-it 20.2.1 pins 7.28.0; 21.x ships 7.29.1).
+Two overrides cross a line on purpose, because no release in the old line is fixed: `basic-ftp` 5 → 6
+(every 5.x is in GHSA-c475-qrg2-pj4r; it is only `release-it`'s proxy agent) and `esbuild` 0.27 → 0.28
+(GHSA-g7r4-m6w7-qqqr is fixed only in 0.28.1; `tsup` 8 asks for ^0.27, and its build output is
+byte-identical on 0.28).

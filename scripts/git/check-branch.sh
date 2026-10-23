@@ -17,6 +17,11 @@ fi
 if printf '%s\n' "$branch" | grep -qE "$pattern"; then
   exit 0
 fi
+# A bot's branch (dependabot/…) passes in CI only, keyed on the GitHub actor no person can take.
+if [ -n "${FRIDAY_CI_EVENT:-}" ] && friday_is_listed "$AUTOMATION_IDENTITIES" "" "" "${FRIDAY_CI_ACTOR:-}"; then
+  echo "▸ branch \"$branch\" has no ticket; waived for automation (${FRIDAY_CI_ACTOR})" >&2
+  exit 0
+fi
 if friday_exempt_pusher; then
   echo "⚠ branch \"$branch\" has no ticket; waived for an exempt identity (EXEMPT_IDENTITIES)" >&2
   exit 0
