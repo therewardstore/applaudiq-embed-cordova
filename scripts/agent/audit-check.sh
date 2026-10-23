@@ -40,6 +40,14 @@ scratch_copy() {
   # pnpm-workspace.yaml may hold its own auditConfig: the copy drops that block.
   [ ! -f pnpm-workspace.yaml ] || awk '/^auditConfig:/ { skip = 1; next } skip && /^[^[:space:]]/ { skip = 0 } !skip' \
     pnpm-workspace.yaml > "$1/pnpm-workspace.yaml"
+  # An override to a package inside the repo (`file:./vendor/x`) must come along, or re-resolving fails.
+  node -e 'const o = (require("./package.json").pnpm || {}).overrides || {};
+    for (const v of Object.values(o)) { const m = String(v).match(/^(?:file|link):(\.\/[^]+)$/);
+      if (m && !m[1].split("/").includes("..")) console.log(m[1]); }' |
+    while IFS= read -r dir; do
+      [ -d "$dir" ] || continue
+      mkdir -p "$1/$(dirname "$dir")" && cp -R "$dir" "$1/$dir"
+    done
 }
 
 # Each override is dropped in a scratch copy, the lockfile re-resolved and the tree re-audited: an
