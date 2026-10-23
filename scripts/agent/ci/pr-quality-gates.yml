@@ -74,7 +74,8 @@ jobs:
 
   agent-gates:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # A big first PR (a lint refactor over hundreds of files) spends most of this in the code rules.
+    timeout-minutes: 45
     permissions:
       contents: read
       pull-requests: write
@@ -93,6 +94,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # No .env on a runner: the build reads the committed example, as a fresh clone does.
+      - run: '[ ! -f .env.example ] || [ -f .env ] || cp .env.example .env'
       - name: Pin the policy to the base branch
         if: github.event_name == 'pull_request'
         env:
@@ -100,10 +103,15 @@ jobs:
         run: |
           base="$BASE_SHA"
           changed="$(git diff --name-only "$base" HEAD -- scripts/agent scripts/git .github/workflows/pr-quality-gates.yml .github/workflows/pr-review.yml)"
-          if [ -n "$changed" ]; then
-            echo "::notice title=policy-change::this pull request changes the gate policy; the base branch's policy judges it and a code owner must approve"
-            git checkout "$base" -- scripts/agent scripts/git
+          [ -n "$changed" ] || exit 0
+          # The PR that brings the CI contract finds no ci stage on its base: its own policy judges it.
+          base_gates="$(git show "$base:scripts/agent/gates.sh" 2>/dev/null || true)"
+          if ! grep -qE '(^|[|[:space:]])ci\)' <<< "$base_gates"; then
+            echo "::notice title=policy-bootstrap::the base branch has no CI gate policy yet; this pull request's own policy judges it and a code owner must approve"
+            exit 0
           fi
+          echo "::notice title=policy-change::this pull request changes the gate policy; the base branch's policy judges it and a code owner must approve"
+          git checkout "$base" -- scripts/agent scripts/git
       - name: Install gitleaks
         run: curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz" | sudo tar -xz -C /usr/local/bin gitleaks
       - name: Gates
@@ -134,6 +142,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # No .env on a runner: the build reads the committed example, as a fresh clone does.
+      - run: '[ ! -f .env.example ] || [ -f .env ] || cp .env.example .env'
       - run: pnpm build
       - run: echo "no test stage"
 

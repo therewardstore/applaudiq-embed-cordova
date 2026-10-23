@@ -11,7 +11,7 @@ disagree, the skill wins.
 | pre-commit | the code rules on the staged lines (`scan-diff.sh --cached`) → the file cap (`bash scripts/git/check-file-cap.sh`) → `pnpm typecheck` | staged files, then the whole tree's types |
 | commit-msg | the branch ticket filled in (`prepare-commit-msg.sh`), then the header format, ticket match, no attribution trailers or bot identity (`check-commit-msg.sh`) | the message |
 | pre-push | branch name (`check-branch.sh`) → commits being pushed (`check-commit-range.sh`) → docs moved (`check-docs-moved.sh`) → `pnpm typecheck` → `pnpm build` → `pnpm run audit:deps` | the branch, new commits, then the tree |
-| CI | not wired here (CI=''): `pr-quality-gates.yml` only retitles PRs. Wired, it would run on a clean checkout `pnpm install --frozen-lockfile` → `pnpm typecheck` → `pnpm build` → `pnpm run audit:deps` | a clean checkout |
+| CI | the `agent-gates` workflow: `bash scripts/agent/gates.sh ci` on the pull request HEAD with the BASE branch's policy, or its own when the base has no `ci` stage yet (branch, commits, secret scan, code rules, cap, docs, lint, types, the full suite, build, size, audit), then the merged result built and tested in `agent-gates-merged`; the AI review is manual (`trs-app ci review <pr>`) | a clean checkout |
 
 ## The lint gate
 

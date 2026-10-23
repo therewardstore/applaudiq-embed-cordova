@@ -25,5 +25,5 @@ Written once by `trs-app agents upgrade`; edit or delete it when the team has re
 `.friday-backup/<stamp>/` and the previous manifest. The last resort is the friday release this repo had
 before (its version is in `scripts/agent/agent.manifest` in git history):
 `pnpm dlx @therewardstore/create-app@<that version> agents-init`. The repo's own values (caps, comment length,
-default branch) were kept by the upgrade; `trs-app agents upgrade --comment-lines 2 --file-cap 2000`
-adopts the 0.7 policy when the team is ready.
+default branch) were kept by the upgrade. TRS-14967 set the file cap to 2000 (`--file-cap 2000`);
+`trs-app agents upgrade --comment-lines 2` adopts 0.7's comment length when the team is ready.

@@ -105,7 +105,7 @@ friday_load_conf() {
   : "${REVIEW_RULES=advisory}"
   : "${REVIEW_STATUS=0}"
   : "${BASELINE_EXPIRES=90}"
-  : "${CODEOWNERS_TEAM=FE-Arch-Review}"
+  : "${CODEOWNERS_TEAM=devleads}"
   : "${CONTRACT_REPO=}"
   : "${PROFILE=app}"
   friday_apply_env_overrides

@@ -99,3 +99,6 @@ type-check tooling); the package has no runtime `dependencies`, so nothing reach
 `pnpm.overrides` in `package.json` pins the patched versions of the fixable ones, and
 `pnpm.auditConfig.ignoreGhsas` lists only those with no fix anywhere: `braces` (GHSA-vfj7-8cjw-p6xm, no fixed version). Drop an override or an
 exception as soon as an upgrade of its parent (`release-it`) makes it unnecessary.
+Two overrides cross a major on purpose, because no release in the old line is fixed: `tmp` 0.0 → 0.2
+(`release-it`'s editor prompt; nothing below 0.2.7 is fixed) and `basic-ftp` 5 → 6 (every 5.x is in
+GHSA-c475-qrg2-pj4r; it is only `release-it`'s proxy agent).

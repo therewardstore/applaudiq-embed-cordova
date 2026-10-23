@@ -1,6 +1,6 @@
-# scripts/agent/agent.manifest — what friday (trs-app 0.7.17) installed here.
+# scripts/agent/agent.manifest — what friday (trs-app 0.7.20) installed here.
 # Do not edit: a re-run of `trs-app agents upgrade` rewrites it and removes what it no longer ships.
-# version: 0.7.17
+# version: 0.7.20
 # playbook: v19 2026-10-16
 # owned
 .agents/rules/commits-and-branches.md
@@ -99,21 +99,21 @@ scripts/git/doc-map.txt
 .cursor/rules/commits-and-branches.mdc c75002af1ff6833b3cd1c24daa3fcfa74e0a78a2bc4c20b6d91f5e4d90d76389
 .cursor/rules/project.mdc 7a0f0d11971fb45afcf881bde3b8f516e4f28e699cb3aa1fb37a6d8bd3eabb9f
 .cursor/rules/skills.mdc 9f7535eb341248bbef635f3b2fa648d2f474fb7ee4b2bef4e180b10886f32c20
-.github/workflows/pr-quality-gates.yml c9db39a5d8e242d3519c0d12e1ee9dae069c7168daeeb18eaf0cd691c4e44b05
+.github/workflows/pr-quality-gates.yml a8a12c39c26b6e97ce95583204e9a128898d946026a135ceb64219267bcc5c40
 .github/workflows/pr-review.yml 8175863e9b3f085766824663c7ebf0e598a64682d782a27389d66bf4c6c47277
-docs/GATES.md 2958735bedfcfe4862850d0e7b4dc8dc828e8403d457a2268fea7df0864c0e3d
+docs/GATES.md db5671f96a3aad8a123826114062a80d5c9f52e70c9ca6a19c6d678e94282505
 docs/TOOLS.md 686b2dc777b3067492042adb0415a07fdc12bea7651cd31906297dc88d4451ef
-orbit.repo.json b11962e0200a2fc65afd30c793e88f8c43c725438d00b2a8b1eb21c5e0227101
+orbit.repo.json ba52b02981dfc41d38693f5ca59c79c33330baa0499afde187cf5cf2e610284d
 scripts/agent/ci/fe-agent-gates.tf.example 06897ccfb326de2a9bebbd8f7bc7b0aa61a7b73ca360820154c8746d0abf79eb
 scripts/agent/ci/orbit-hooks.example 46641ab023672da8e1ea8e8f648f62e27c424ffea657490b349a64b554ed4fd2
-scripts/agent/ci/pr-quality-gates.yml f220c3b03d963b548a7610cbf36544c02266eeb1e1b61ac83ccb50c4eb393317
+scripts/agent/ci/pr-quality-gates.yml a8a12c39c26b6e97ce95583204e9a128898d946026a135ceb64219267bcc5c40
 scripts/agent/doctor.sh 5b224282cb58e53fb1b1dfbf0b87fba481b1a202158d20261d5aa3d71506b43f
 scripts/agent/drift-check.sh 41bd15699c769cba2f5ce264299bebb58af9c5667f3da20e083628e864f9f821
-scripts/agent/env-check.sh 753b567457d611e8aaecf42a0eabfe13233b2583fbb990ab4ac0853c9b15750e
+scripts/agent/env-check.sh ad3e8bd1b2d77a9dc9a4cd679dbc0d8acd1da28b143e9bc8ae1bbf42e52f109c
 scripts/agent/fingerprint.sh 45c086830eb7e7e02dff1bf9913d7ecdc57ad9f7ea66ebbc26b5f7c57064cd94
 scripts/agent/gates.sh 98bee15e2b16ae846220a29e77b6b62326b9a55bac38e6200ebf9eb37244e258
 scripts/agent/guard-shell.sh 539842a7c688c7b36abdd5984759b2c95f95a9ca665f234dce5c394cacc9ea77
-scripts/agent/lib.sh 7d67198d3dd644c9149bed1bdaf4ab196f12042aa8425fd200a5cd34b992a509
+scripts/agent/lib.sh bfc206a06a1fefd47626a673f314460e74e5ca6b2271ae1f2b17a0bb7227d1c5
 scripts/agent/playbook-version f9d4d808da198f758443a1d426e4fcf1c0ba6f7928ad645a40415c9679ce20d0
 scripts/agent/prompt-check.sh facc21610e403e7d31a256199729736715e3ec67fc172ce8ec5b945b0a5e6d26
 scripts/agent/qa-confirmed.sh b8d831d88228551cf87210fe134f42e8b53480dc2fbab254b5c6075879d3899d

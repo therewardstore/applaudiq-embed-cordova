@@ -26,6 +26,10 @@ mapping="$(grep -oE '^[[:space:]]*[A-Z][A-Z0-9_]*:[[:space:]]*process\.env\.[A-Z
 # shellcheck disable=SC2086
 # Comment lines are skipped: env.ts's own doc comment names process.env.APP_FOO as an example.
 code_keys="$( { printf '%s\n' "$mapping" | cut -f2; cat $helpers | grep -vE '^[[:space:]]*(//|\*|/\*)' | grep -oE 'process\.env\.[A-Z][A-Z0-9_]*' | sed 's/process\.env\.//'; } | sed '/^$/d' | sort -u)"
+# NODE_ENV is the bundler's, never a .env key.
+code_keys="$(printf '%s\n' "$code_keys" | grep -vx NODE_ENV || true)"
+# A key only the build config reads (a dev proxy target, a deploy marker) is still a real example key.
+build_keys="$(cat rspack.config.* vite.config.* next.config.* app.config.* 2>/dev/null | grep -vE '^[[:space:]]*(//|\*|/\*)' | grep -oE 'process\.env\.[A-Z][A-Z0-9_]*' | sed 's/process\.env\.//' | sort -u)"
 required_names="$(grep -oE "required\('[A-Z][A-Z0-9_]*'\)" "$envts" | sed -E "s/required\('([A-Z0-9_]+)'\)/\1/" | sort -u)"
 # A remote origin read `as string` in remotes.ts is required too: the build throws without it.
 required_keys="$( { for n in $required_names; do printf '%s\n' "$mapping" | awk -F'\t' -v n="$n" '$1 == n { print $2 }'; done
@@ -37,7 +41,7 @@ for k in $code_keys; do
   printf '%s\n' "$example_keys" | grep -qx "$k" || problem "$k is read by $envts but missing from .env.example"
 done
 for k in $example_keys; do
-  printf '%s\n' "$code_keys" | grep -qx "$k" || problem "$k is in .env.example but no env helper reads it ($(printf '%s' "$helpers" | tr '\n' ' ')): remove it, or read it"
+  printf '%s\n' "$code_keys" "$build_keys" | grep -qx "$k" || problem "$k is in .env.example but no env helper reads it ($(printf '%s' "$helpers" | tr '\n' ' ')): remove it, or read it"
 done
 
 if [ "$example_only" = 0 ]; then
