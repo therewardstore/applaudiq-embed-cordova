@@ -1,19 +1,20 @@
 {
   "git": {
     "commitMessage": "chore: release ${version}",
-    "tagName": "${version}",
+    "tagName": "v${version}",
     "tagAnnotation": "Release ${version}",
     "requireCleanWorkingDir": true,
-    "push": true
+    "tag": false,
+    "push": false
   },
   "npm": {
-    "publish": true
+    "publish": false
   },
   "github": {
     "release": false
   },
   "hooks": {
-    "before:init": ["npm run typecheck"],
-    "after:bump": "npm run build"
+    "before:init": ["pnpm run typecheck"],
+    "after:bump": "pnpm run build"
   }
 }

@@ -1,0 +1,5 @@
+# Every stage lives in scripts/agent/gates.sh and reads scripts/agent/agent.conf.
+# A gate changes there and in docs/GATES.md, never here. `git commit --no-verify`
+# skips this from the CLI; the VS Code setting `git.allowNoVerifyCommit: false`
+# blocks it in the GUI on purpose, and pre-push re-checks every unpushed commit.
+bash scripts/agent/gates.sh pre-commit

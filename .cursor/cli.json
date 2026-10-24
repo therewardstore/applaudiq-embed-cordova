@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(bash:scripts/agent/*)",
+      "Shell(bash:scripts/git/*)",
+      "Shell(pnpm:typecheck)",
+      "Shell(pnpm:build)",
+      "Shell(pnpm:run audit:deps)"
+    ]
+  }
+}
