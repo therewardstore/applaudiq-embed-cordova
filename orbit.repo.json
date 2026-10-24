@@ -2,7 +2,7 @@
   "name": "applaudiq-embed-cordova",
   "kind": "sdk",
   "pm": "pnpm",
-  "node": "22.14.0",
+  "node": "24.22.1",
   "profile": "gates-only",
   "branches": {
     "default": "master",
@@ -27,6 +27,6 @@
     "build",
     "typecheck"
   ],
-  "friday": "0.7.26",
+  "friday": "0.7.27",
   "modules": []
 }

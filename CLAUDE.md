@@ -100,7 +100,7 @@ type-check tooling); the package has no runtime `dependencies`, so nothing reach
 `pnpm.auditConfig.ignoreGhsas` is empty: every known advisory is fixed. Add an exception there only for an
 advisory with no fix anywhere, say why here, and drop an override or an exception as soon as an upgrade
 of its parent (`release-it`, `tsup`) makes it unnecessary.
-`release-it` stays on 20.x: 21.x needs Node ^22.21 and `.nvmrc` pins 22.14.0 (move both together).
+`release-it` stays on 20.x, which runs on Node 24; 21.x (Node ^24.15) is its own change.
 `undici` is lifted within 7.x to ^7.29.1 (release-it 20.2.1 pins 7.28.0; 21.x ships 7.29.1).
 Two overrides cross a line on purpose, because no release in the old line is fixed: `basic-ftp` 5 → 6
 (every 5.x is in GHSA-c475-qrg2-pj4r; it is only `release-it`'s proxy agent) and `esbuild` 0.27 → 0.28
