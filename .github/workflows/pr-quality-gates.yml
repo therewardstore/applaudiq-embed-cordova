@@ -150,5 +150,9 @@ jobs:
   # The cross-repo gates the Orbit workspace adds (contracts, records); enabled because ORBIT=1.
   orbit-gates:
     if: github.event_name == 'pull_request'
+    # A called workflow may not ask for more than this job grants, and orbit.yml's pr-title asks for PR write.
+    permissions:
+      contents: read
+      pull-requests: write
     uses: therewardstore/orbit/.github/workflows/orbit.yml@main
     secrets: inherit
