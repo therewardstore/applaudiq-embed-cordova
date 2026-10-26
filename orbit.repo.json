@@ -1,0 +1,32 @@
+{
+  "name": "applaudiq-embed-cordova",
+  "kind": "sdk",
+  "pm": "pnpm",
+  "node": "24.22.1",
+  "profile": "gates-only",
+  "branches": {
+    "default": "master",
+    "production": "master"
+  },
+  "remotes": [],
+  "exposes": [],
+  "consumesRoutes": [],
+  "env": {
+    "required": [],
+    "optional": []
+  },
+  "gates": {
+    "types": "pnpm typecheck",
+    "lint": "",
+    "test": "",
+    "build": "pnpm build",
+    "size": "",
+    "audit": "pnpm run audit:deps"
+  },
+  "scripts": [
+    "build",
+    "typecheck"
+  ],
+  "friday": "0.7.29",
+  "modules": []
+}

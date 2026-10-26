@@ -1,0 +1,4 @@
+# friday:agents:start
+# <code path regex>|<files or folders that must change with it>
+# One line per module. A module under src/modules/ with no line here fails the push.
+# friday:agents:end

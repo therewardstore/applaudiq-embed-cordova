@@ -1,0 +1,17 @@
+---
+trigger: always_on
+---
+
+- Branches: `TRS-`, `AIQ-` or `INF-`, then 4–7 digits, then optional lowercase kebab-case
+  words, e.g. `TRS-12587`, `TRS-12587-order-export`. Other branch names can't be pushed;
+  `master` changes only by merging a pull request.
+- Commit header: `<type>(<TICKET>): <subject>`, with the branch's ticket as the scope, e.g.
+  `feat(TRS-12587): add category filter to listing`. Types: feat fix refactor perf style docs
+  test build ci chore revert. Subject: non-empty; lowercase, imperative, no period and 72 characters
+  or fewer are suggested, not enforced. Write `feat: <subject>` and the hook fills in the ticket.
+- Body optional: if present, a blank line after the header, then why, wrapped at 100 characters.
+  No footer.
+- Never add an AI `Co-authored-by`, `Generated-by` or "Generated with …" line, or 🤖; a human co-author is fine. Never commit as a bot or AI identity; an agent commits only as the developer,
+  after the developer answered the commit question.
+- Never pass `--no-verify`. If a hook rejects a commit, fix the message instead.
+- The full rules, and the scripts that enforce them: `scripts/git/check-commit-msg.sh` (it prints the rule a message breaks).

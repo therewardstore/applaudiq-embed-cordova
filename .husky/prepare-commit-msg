@@ -1,0 +1,1 @@
+bash scripts/git/prepare-commit-msg.sh "$1" "${2:-}"

@@ -3,7 +3,8 @@ dist/
 
 # deps
 node_modules/
-# a published library doesn't ship or need a committed lockfile (it's not in `files`).
+# pnpm-lock.yaml is committed (installs are reproducible); it is not in `files`, so it is never published.
+# Other package managers' lockfiles are never committed.
 package-lock.json
 yarn.lock
 
@@ -11,3 +12,9 @@ yarn.lock
 .DS_Store
 *.log
 *.tgz
+
+# Private QA notes, personal agent settings, upgrade backups and task state — never committed.
+.qa/
+.claude/settings.local.json
+.friday-backup/
+scripts/agent/state/
