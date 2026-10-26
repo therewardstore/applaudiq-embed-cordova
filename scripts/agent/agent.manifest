@@ -1,6 +1,6 @@
-# scripts/agent/agent.manifest — what friday (trs-app 0.7.27) installed here.
+# scripts/agent/agent.manifest — what friday (trs-app 0.7.31) installed here.
 # Do not edit: a re-run of `trs-app agents upgrade` rewrites it and removes what it no longer ships.
-# version: 0.7.27
+# version: 0.7.31
 # playbook: v19 2026-10-16
 # owned
 .agents/rules/commits-and-branches.md
@@ -102,7 +102,7 @@ scripts/git/doc-map.txt
 .cursor/rules/project.mdc 7a0f0d11971fb45afcf881bde3b8f516e4f28e699cb3aa1fb37a6d8bd3eabb9f
 .cursor/rules/skills.mdc 9f7535eb341248bbef635f3b2fa648d2f474fb7ee4b2bef4e180b10886f32c20
 .github/workflows/dependency-audit.yml 77dc6c9b7271282518088b3a514358464399881c256b53474cb90e5fa6dffa91
-.github/workflows/pr-quality-gates.yml a8a12c39c26b6e97ce95583204e9a128898d946026a135ceb64219267bcc5c40
+.github/workflows/pr-quality-gates.yml e0f2807c7cf25feb20b92d37897cf3be2c5b44e45a203c81158079612ba02ce6
 .github/workflows/pr-review.yml 8175863e9b3f085766824663c7ebf0e598a64682d782a27389d66bf4c6c47277
 docs/GATES.md ef5f61c6a5e745e600456dd473b7cb8ad4c2797134159a2e7a88080f34240829
 docs/TOOLS.md 686b2dc777b3067492042adb0415a07fdc12bea7651cd31906297dc88d4451ef
@@ -110,7 +110,7 @@ orbit.repo.json c1cb0341ca731425edc0a1905d1949b7858021de31919605d03206fe197c01f8
 scripts/agent/audit-check.sh 40a46450a53c0dc4bb03c21dae9553fc0d5133c9556164d2bdd07fa234e87f77
 scripts/agent/ci/fe-agent-gates.tf.example 06897ccfb326de2a9bebbd8f7bc7b0aa61a7b73ca360820154c8746d0abf79eb
 scripts/agent/ci/orbit-hooks.example 46641ab023672da8e1ea8e8f648f62e27c424ffea657490b349a64b554ed4fd2
-scripts/agent/ci/pr-quality-gates.yml a8a12c39c26b6e97ce95583204e9a128898d946026a135ceb64219267bcc5c40
+scripts/agent/ci/pr-quality-gates.yml e0f2807c7cf25feb20b92d37897cf3be2c5b44e45a203c81158079612ba02ce6
 scripts/agent/doctor.sh 5b224282cb58e53fb1b1dfbf0b87fba481b1a202158d20261d5aa3d71506b43f
 scripts/agent/drift-check.sh 41bd15699c769cba2f5ce264299bebb58af9c5667f3da20e083628e864f9f821
 scripts/agent/env-check.sh ad3e8bd1b2d77a9dc9a4cd679dbc0d8acd1da28b143e9bc8ae1bbf42e52f109c
