@@ -9,7 +9,7 @@
 # Required checks (ruleset fe-agent-gates, no bypass actors) never skip on a PR head. A title typed later is fixed on
 # the next push: a title edit runs nothing. ci status|cancel [--force]|rerun [--all-jobs].
 name: PR checks
-run-name: ${{ github.event_name == 'workflow_dispatch' && inputs.job == 'review' && format('Arivu 💡 · PR #{0} · {1}', inputs.pr_number, inputs.model) || format('PR checks · {0}', github.event.pull_request.title || github.ref_name) }}
+run-name: '${{ github.event_name == ''workflow_dispatch'' && inputs.job == ''review'' && format(''Arivu 💡 · PR {0} · {1}'', inputs.pr_number, inputs.model) || format(''PR checks · {0}'', github.event.pull_request.title || github.ref_name) }}'
 
 on:
   pull_request:

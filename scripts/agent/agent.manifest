@@ -1,6 +1,6 @@
-# scripts/agent/agent.manifest — what friday (trs-app 0.8.2) installed here.
+# scripts/agent/agent.manifest — what friday (trs-app 0.8.3) installed here.
 # Do not edit: a re-run of `trs-app agents upgrade` rewrites it and removes what it no longer ships.
-# version: 0.8.2
+# version: 0.8.3
 # playbook: v19 2026-10-16
 # owned
 .agents/rules/commits-and-branches.md
@@ -101,14 +101,14 @@ scripts/git/doc-map.txt
 .cursor/rules/project.mdc 7a0f0d11971fb45afcf881bde3b8f516e4f28e699cb3aa1fb37a6d8bd3eabb9f
 .cursor/rules/skills.mdc 9f7535eb341248bbef635f3b2fa648d2f474fb7ee4b2bef4e180b10886f32c20
 .github/workflows/dependency-audit.yml 77dc6c9b7271282518088b3a514358464399881c256b53474cb90e5fa6dffa91
-.github/workflows/pr-quality-gates.yml 118b49a6d3ee4e8a73b22104454daf827c80b687d254355ffb19c11493557c0a
+.github/workflows/pr-quality-gates.yml e0e317dbe0c05320789ff67b9fec42690e331b883522af5535cb502e3d3a57f7
 docs/GATES.md 2a8c53486078ac44812831989485a747f1bec8d477db2232a47c6e80f87a9d20
 docs/TOOLS.md 686b2dc777b3067492042adb0415a07fdc12bea7651cd31906297dc88d4451ef
 orbit.repo.json c1cb0341ca731425edc0a1905d1949b7858021de31919605d03206fe197c01f8
 scripts/agent/audit-check.sh 40a46450a53c0dc4bb03c21dae9553fc0d5133c9556164d2bdd07fa234e87f77
 scripts/agent/ci/fe-agent-gates.tf.example cdfa2b746c5201da4851fe16a9aa64b9f365c04271cf0236970a398b8ce729fe
 scripts/agent/ci/orbit-hooks.example 46641ab023672da8e1ea8e8f648f62e27c424ffea657490b349a64b554ed4fd2
-scripts/agent/ci/pr-quality-gates.yml 118b49a6d3ee4e8a73b22104454daf827c80b687d254355ffb19c11493557c0a
+scripts/agent/ci/pr-quality-gates.yml e0e317dbe0c05320789ff67b9fec42690e331b883522af5535cb502e3d3a57f7
 scripts/agent/doctor.sh 5b224282cb58e53fb1b1dfbf0b87fba481b1a202158d20261d5aa3d71506b43f
 scripts/agent/drift-check.sh 41bd15699c769cba2f5ce264299bebb58af9c5667f3da20e083628e864f9f821
 scripts/agent/env-check.sh ad3e8bd1b2d77a9dc9a4cd679dbc0d8acd1da28b143e9bc8ae1bbf42e52f109c
