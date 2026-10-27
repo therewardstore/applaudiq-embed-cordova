@@ -257,6 +257,9 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    # A secret cannot gate a step; through env it can: with the Meet Arivu app set up, the review posts as it.
+    env:
+      ARIVU_APP_ID: ${{ secrets.ARIVU_APP_ID }}
     steps:
       # The number reaches gh and the prompt: anything but digits stops the run first.
       - name: The PR number is a number
@@ -317,11 +320,22 @@ jobs:
             in the working directory as {"body": "<the rubric's report>", "comments": [{"path": "<file>",
             "line": <line in the new file>, "body": "problem — why it matters"}]}, at most 20. Nothing to
             say → {"body": "review: nothing to fix", "comments": []}. The next step posts it as a COMMENT review.
+      # The app's short-lived token (pull requests only) makes the author meet-arivu[bot]; without the org secrets
+      # ARIVU_APP_ID and ARIVU_APP_PRIVATE_KEY this is skipped and the review posts as github-actions[bot].
+      - name: Sign in as Meet Arivu
+        id: arivu
+        if: env.ARIVU_APP_ID != ''
+        continue-on-error: true
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.ARIVU_APP_ID }}
+          private-key: ${{ secrets.ARIVU_APP_PRIVATE_KEY }}
+          permission-pull-requests: write
       # Posted here, never by the model: always a COMMENT review, so nothing in a PR can make it approve.
       # The header says what was reviewed; its hidden marker lets the next `--since last` start after this commit.
       - name: Post the review as a comment
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.arivu.outputs.token || github.token }}
           PR_NUMBER: ${{ inputs.pr_number }}
           MODEL: ${{ inputs.model }}
           FILES: ${{ inputs.all == 'true' && 'all files' || 'risky files' }}

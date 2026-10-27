@@ -1,6 +1,6 @@
-# scripts/agent/agent.manifest — what friday (trs-app 0.8.0) installed here.
+# scripts/agent/agent.manifest — what friday (trs-app 0.8.2) installed here.
 # Do not edit: a re-run of `trs-app agents upgrade` rewrites it and removes what it no longer ships.
-# version: 0.8.0
+# version: 0.8.2
 # playbook: v19 2026-10-16
 # owned
 .agents/rules/commits-and-branches.md
@@ -89,8 +89,8 @@ scripts/git/doc-map.txt
 .agents/rules/project.md a4099c9fd40123b9a549e243b354cb9e7a257f6331c26ebcc69c5d51d84ca635
 .claude/skills/finalize/SKILL.md fd9169cf52fde63d328028bb179a7ce42d88bbec22626992869cc693df6916ee
 .claude/skills/flow/SKILL.md e3c10eae242867f9b3116f200c4588463aedebef0612785352287af3b4ed2881
-.claude/skills/handoff/SKILL.md de364805b329e9afa39495872de91a16bb47a5ca5085a829163528a95d7fc64e
-.claude/skills/review/SKILL.md 67cddd642b1b442ee896a2872164835f4727e33598a41a22dccc43a9dc04a013
+.claude/skills/handoff/SKILL.md 1fa146183d095cd4b1f13311c86b71cd8bf76373e2cdd21a7f443bd7cc15f98d
+.claude/skills/review/SKILL.md 7bed75f25e1723c8900b8d9fa945cf96e9aa08551df3241e8de84d1f4fc76c04
 .claude/skills/scan/SKILL.md 6c6dd99e9e9a90989e4ed6e5e96c7e2d2632d8fd9e3aed2b85e76e5fc6a55e46
 .claude/skills/task/SKILL.md 37e2c1df3eafb1b9bd2d1dc77825aa4b8ed3addcaaf01b18c8feac33196dd226
 .codex/config.toml 576a72f25faa0c70d0187818f2c836a6965e2b29b587e06b4e066bf9173f2184
@@ -101,14 +101,14 @@ scripts/git/doc-map.txt
 .cursor/rules/project.mdc 7a0f0d11971fb45afcf881bde3b8f516e4f28e699cb3aa1fb37a6d8bd3eabb9f
 .cursor/rules/skills.mdc 9f7535eb341248bbef635f3b2fa648d2f474fb7ee4b2bef4e180b10886f32c20
 .github/workflows/dependency-audit.yml 77dc6c9b7271282518088b3a514358464399881c256b53474cb90e5fa6dffa91
-.github/workflows/pr-quality-gates.yml 0609d3dfb6a80a6537985648a558291c53aaab6f79cbb545657ed9cc8bdfca10
+.github/workflows/pr-quality-gates.yml 118b49a6d3ee4e8a73b22104454daf827c80b687d254355ffb19c11493557c0a
 docs/GATES.md 2a8c53486078ac44812831989485a747f1bec8d477db2232a47c6e80f87a9d20
 docs/TOOLS.md 686b2dc777b3067492042adb0415a07fdc12bea7651cd31906297dc88d4451ef
 orbit.repo.json c1cb0341ca731425edc0a1905d1949b7858021de31919605d03206fe197c01f8
 scripts/agent/audit-check.sh 40a46450a53c0dc4bb03c21dae9553fc0d5133c9556164d2bdd07fa234e87f77
 scripts/agent/ci/fe-agent-gates.tf.example cdfa2b746c5201da4851fe16a9aa64b9f365c04271cf0236970a398b8ce729fe
 scripts/agent/ci/orbit-hooks.example 46641ab023672da8e1ea8e8f648f62e27c424ffea657490b349a64b554ed4fd2
-scripts/agent/ci/pr-quality-gates.yml 0609d3dfb6a80a6537985648a558291c53aaab6f79cbb545657ed9cc8bdfca10
+scripts/agent/ci/pr-quality-gates.yml 118b49a6d3ee4e8a73b22104454daf827c80b687d254355ffb19c11493557c0a
 scripts/agent/doctor.sh 5b224282cb58e53fb1b1dfbf0b87fba481b1a202158d20261d5aa3d71506b43f
 scripts/agent/drift-check.sh 41bd15699c769cba2f5ce264299bebb58af9c5667f3da20e083628e864f9f821
 scripts/agent/env-check.sh ad3e8bd1b2d77a9dc9a4cd679dbc0d8acd1da28b143e9bc8ae1bbf42e52f109c

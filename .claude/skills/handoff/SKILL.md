@@ -70,9 +70,8 @@ Orbit workspace; tracked, so QA and CI see it; `.qa/` stays for private notes an
 migrated) and print the path. Developer confirmations are appended, never rewritten:
 `confirmed: <case> @ <sha>`, written by `/flow`'s follow-up commit — with `QA_CONFIRM=advisory`,
 `required` means CI's `qa-confirmed` check needs one per case.
-Then comment the plan's "What changed" and the PR link on the ticket with the marker
-`[friday handoff <fingerprint>]` with the Atlassian MCP (`addCommentToJiraIssue`, the text
-`ship.sh` prints); a ticket that already has a comment with that marker gets no second one.
+The ticket comment is not yours to post: once the PR checks pass, check 5 (Jira update) writes it and
+edits it on every later run, with the QA plan from the PR description.
 Print the body only if asked. Change nothing else: no source edits; the commit is `/flow`'s.
 
 ## Stop conditions
