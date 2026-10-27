@@ -1,6 +1,6 @@
-# scripts/agent/agent.manifest — what friday (trs-app 0.8.3) installed here.
+# scripts/agent/agent.manifest — what friday (trs-app 0.11.0) installed here.
 # Do not edit: a re-run of `trs-app agents upgrade` rewrites it and removes what it no longer ships.
-# version: 0.8.3
+# version: 0.11.0
 # playbook: v19 2026-10-16
 # owned
 .agents/rules/commits-and-branches.md
@@ -45,17 +45,12 @@
 .cursor/skills/review
 .cursor/skills/scan
 .cursor/skills/task
-.github/workflows/dependency-audit.yml
-.github/workflows/pr-quality-gates.yml
 docs/GATES.md
 docs/TOOLS.md
 orbit.repo.json
 scripts/agent/agent.conf
 scripts/agent/agent.manifest
 scripts/agent/audit-check.sh
-scripts/agent/ci/fe-agent-gates.tf.example
-scripts/agent/ci/orbit-hooks.example
-scripts/agent/ci/pr-quality-gates.yml
 scripts/agent/doctor.sh
 scripts/agent/drift-check.sh
 scripts/agent/env-check.sh
@@ -100,22 +95,17 @@ scripts/git/doc-map.txt
 .cursor/rules/commits-and-branches.mdc c75002af1ff6833b3cd1c24daa3fcfa74e0a78a2bc4c20b6d91f5e4d90d76389
 .cursor/rules/project.mdc 7a0f0d11971fb45afcf881bde3b8f516e4f28e699cb3aa1fb37a6d8bd3eabb9f
 .cursor/rules/skills.mdc 9f7535eb341248bbef635f3b2fa648d2f474fb7ee4b2bef4e180b10886f32c20
-.github/workflows/dependency-audit.yml 77dc6c9b7271282518088b3a514358464399881c256b53474cb90e5fa6dffa91
-.github/workflows/pr-quality-gates.yml e0e317dbe0c05320789ff67b9fec42690e331b883522af5535cb502e3d3a57f7
-docs/GATES.md 2a8c53486078ac44812831989485a747f1bec8d477db2232a47c6e80f87a9d20
+docs/GATES.md bd70176dfb8bfa5a0692458a71e69ea77cf65a8c9f3be4981f07156d84555652
 docs/TOOLS.md 686b2dc777b3067492042adb0415a07fdc12bea7651cd31906297dc88d4451ef
 orbit.repo.json c1cb0341ca731425edc0a1905d1949b7858021de31919605d03206fe197c01f8
 scripts/agent/audit-check.sh 40a46450a53c0dc4bb03c21dae9553fc0d5133c9556164d2bdd07fa234e87f77
-scripts/agent/ci/fe-agent-gates.tf.example cdfa2b746c5201da4851fe16a9aa64b9f365c04271cf0236970a398b8ce729fe
-scripts/agent/ci/orbit-hooks.example 46641ab023672da8e1ea8e8f648f62e27c424ffea657490b349a64b554ed4fd2
-scripts/agent/ci/pr-quality-gates.yml e0e317dbe0c05320789ff67b9fec42690e331b883522af5535cb502e3d3a57f7
-scripts/agent/doctor.sh 5b224282cb58e53fb1b1dfbf0b87fba481b1a202158d20261d5aa3d71506b43f
-scripts/agent/drift-check.sh 41bd15699c769cba2f5ce264299bebb58af9c5667f3da20e083628e864f9f821
+scripts/agent/doctor.sh 19c01a451c12a0d2d7c64282eb0e5fc335c22c3487135a7897313ee0c44775ae
+scripts/agent/drift-check.sh d04898c9a36edff5ab578f80a9ae05ee6605a9dcfb3a5259c9379747dddee90e
 scripts/agent/env-check.sh ad3e8bd1b2d77a9dc9a4cd679dbc0d8acd1da28b143e9bc8ae1bbf42e52f109c
 scripts/agent/fingerprint.sh 45c086830eb7e7e02dff1bf9913d7ecdc57ad9f7ea66ebbc26b5f7c57064cd94
-scripts/agent/gates.sh e6ace77a6924d94b54be007c280ac1b2a19dd67e7fe2eb738c7c222d16d46cf7
+scripts/agent/gates.sh a4e127b0f51b561ae4300bea2d6917e8ed770f798b61d6cdb051a57bf24ac660
 scripts/agent/guard-shell.sh 539842a7c688c7b36abdd5984759b2c95f95a9ca665f234dce5c394cacc9ea77
-scripts/agent/lib.sh bac8de05c08c82247028218141ffbebfb419a8abdfd237915a0a18dd50afef98
+scripts/agent/lib.sh b295eaf7f72220c536a0ce4318e07b776ebaf0cf30c60444cd69bc45654dc9a3
 scripts/agent/playbook-version f9d4d808da198f758443a1d426e4fcf1c0ba6f7928ad645a40415c9679ce20d0
 scripts/agent/prompt-check.sh facc21610e403e7d31a256199729736715e3ec67fc172ce8ec5b945b0a5e6d26
 scripts/agent/qa-confirmed.sh b8d831d88228551cf87210fe134f42e8b53480dc2fbab254b5c6075879d3899d
@@ -124,7 +114,7 @@ scripts/agent/scan-diff.sh 3b97d9d413f316962680da1520a1b42ad4900fec6461e752c5bca
 scripts/agent/session-check.sh c2898c262ed71adcccc59c508102614f8213f4369cf9b763760290d9470bc3af
 scripts/agent/ship.sh 2c399b1d9025185c2ce7b7902ca7b09228d1e62b86da8cfe7f7c3fa2ca53b1fc
 scripts/agent/status.sh 074779db2383b519f2c0527fdd58bde7c25966982c8070c987e955c1a4c15dce
-scripts/agent/test-changed.sh b396cc93a5dbc0991a64dc141a0956339b8f181e070a025e21b30c7b88fe2ce4
+scripts/agent/test-changed.sh 26043e555aaa2222952454bf31087307eaaeb5efa2867b0568d0115d231ed415
 scripts/git/check-branch.sh e591a1d81ce7d30b7d31e33b48fe9d645841a44ca24c728bcbbdef2320a157f1
 scripts/git/check-commit-msg.sh 2dcde848f04c8ece20ed543f5719e3fbf8cef1e34c5f6d176db372eca7db96e6
 scripts/git/check-commit-range.sh 7d4b519c430628070c094dad6ddb701649668f092acba7ee3c059a49a0f69a36

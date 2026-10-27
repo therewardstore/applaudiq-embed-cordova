@@ -213,7 +213,7 @@ case "$stage" in
     tree_gates
     while read -r range; do
       [ -z "$range" ] && continue
-      gate "changed files' own tests" "bash scripts/agent/test-changed.sh $range"
+      gate "$( [ "${TEST_SCOPE:-own}" = related ] && echo "changed files' tests (own + related)" || echo "changed files' own tests")" "bash scripts/agent/test-changed.sh $range"
     done <<< "$ranges"
     release_gates
     orbit_chain pre-push "$refs"
@@ -363,7 +363,8 @@ case "$stage" in
       range_gates "$branch" "$range"
     fi
     tree_gates
-    full_tests
+    # CI_TESTS=0: the tests ran at push time (changed files and the files that import them), not here.
+    if [ "${CI_TESTS:-1}" = 1 ]; then full_tests; else echo "▸ tests: run at push time (pre-push, TEST_SCOPE=${TEST_SCOPE:-own}), not in CI"; fi
     release_gates
     ;;
   *)

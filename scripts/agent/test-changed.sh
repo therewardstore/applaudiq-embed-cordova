@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# The test gate the pre-push hook, /task and /finalize share: the changed files'
-# OWN tests, never every importer's (`vitest related`) and never the full suite.
+# The test gate the pre-push hook, /task and /finalize share. TEST_SCOPE=own runs the changed
+# files' own tests; TEST_SCOPE=related (Vitest) also runs every test importing them (`vitest related`),
+# for repos whose CI runs no tests (CI_TESTS=0). Never the full suite.
 # A changed source file the coverage config measures fails without a test and is
 # held to COVERAGE_MIN per file; REQUIRE_OWN_TEST=0 / COVERAGE_MIN='' turn that off.
 # TEST_FILES_CMD names the runner; an empty GATE_TEST means this repo has no test
@@ -57,12 +58,32 @@ if [ "${#missing[@]}" -gt 0 ]; then
   exit 1
 fi
 tests="$(printf '%s\n' "$tests" | sed '/^$/d' | sort -u)"
+count() { printf '%s\n' "$1" | sed '/^$/d' | wc -l | tr -d ' '; }
+# related: Vitest walks the import graph from every changed file, so a changed file without a test
+# of its own still runs the tests of the files that use it; the own-test rule above still applies.
+if [ "${TEST_SCOPE:-own}" = related ]; then
+  case "$TEST_FILES_CMD" in
+    *"vitest run"*)
+      cmd="${TEST_FILES_CMD/vitest run/vitest related --run --passWithNoTests}"
+      echo "test-changed: tests of $(count "$src") changed file(s) and of every file importing them (vitest related)"
+      if [ -n "$COVERAGE_MIN" ] && [ -n "$measured" ]; then
+        args=()
+        for f in $measured; do args+=(--coverage.include="$f"); done
+        # shellcheck disable=SC2086
+        exec $cmd $src --coverage --coverage.reporter=text --coverage.thresholds.perFile \
+          --coverage.thresholds.statements="$COVERAGE_MIN" --coverage.thresholds.branches="$COVERAGE_MIN" \
+          --coverage.thresholds.functions="$COVERAGE_MIN" --coverage.thresholds.lines="$COVERAGE_MIN" "${args[@]}"
+      fi
+      # shellcheck disable=SC2086
+      exec $cmd $src ;;
+    *) echo "▸ TEST_SCOPE=related needs a vitest TEST_FILES_CMD; running the changed files' own tests" ;;
+  esac
+fi
 if [ -z "$tests" ]; then
   echo "test-changed: the changed files are not measured and no test changed; nothing to test"
   exit 0
 fi
 
-count() { printf '%s\n' "$1" | sed '/^$/d' | wc -l | tr -d ' '; }
 # Coverage flags are vitest's; another runner gets the test files only.
 vitest=0; case "$TEST_FILES_CMD" in *vitest*) vitest=1 ;; esac
 if [ -z "$COVERAGE_MIN" ] || [ -z "$measured" ] || [ "$vitest" = 0 ]; then

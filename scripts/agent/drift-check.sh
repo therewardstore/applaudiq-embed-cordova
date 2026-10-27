@@ -87,6 +87,10 @@ check_package_manager() {  # a pnpm repo stays pnpm: no npm or yarn lockfile, no
   node -e 'const s=require("./package.json").scripts||{};for(const[k,v]of Object.entries(s))if(/(^|[\s;&|(])(npm|npx|yarn)\s/.test(v))console.log(k)' 2>/dev/null \
     | while IFS= read -r k; do echo "package.json script \"$k\" calls npm, npx or yarn: use pnpm run or pnpm exec → package.json"; done
 }
+check_runner() {  # every workflow job runs on the org runner (CI_RUNNER), never on GitHub's runners
+  grep -lsE '^\s*runs-on:.*(ubuntu|windows|macos)-' .github/workflows/*.yml .github/workflows/*.yaml 2>/dev/null \
+    | while IFS= read -r f; do echo "$f runs a job on a GitHub runner: use runs-on: ${CI_RUNNER} (CI_RUNNER) → $f"; done
+}
 check_eslint_fragment() {  # the generated selectors are actually spread into the lint config
   [ -f scripts/agent/eslint-rules.mjs ] || return 0
   ls eslint.config.* >/dev/null 2>&1 || return 0
@@ -119,6 +123,7 @@ run check_docs_index
 run check_modules
 run check_gates
 run check_package_manager
+run check_runner
 run check_eslint_fragment
 run check_skill_length
 run check_components
