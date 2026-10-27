@@ -50,6 +50,8 @@ One line per finding, as the comment you would leave, with the exact place. At m
     Mechanical: <scan-diff summary line>
     Next
       /task <prompt that fixes the Must fix lines> | nothing to fix: /finalize
+      then ./orbit ship <KEY>; once the PR checks pass, the Arivu review: ./orbit ci review <repo> <pr>
+      (after a fix: --since last · --model haiku|sonnet|opus|fable · --all)
 
 ## Stop conditions
 

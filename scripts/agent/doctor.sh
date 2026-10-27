@@ -37,8 +37,15 @@ case "$HOOKS" in
   chain:*) [ -n "$hooks_path" ] && ok "  chained hooks at $hooks_path (${HOOKS#chain:})" || ko "  HOOKS=$HOOKS but core.hooksPath is unset" ;;
   *) ok "  no git hooks by policy (HOOKS=$HOOKS); pre-push and CI are the nets" ;;
 esac
+if [ "$CI" != off ]; then
+  grep -lsE '^\s*runs-on:.*(ubuntu|windows|macos)-' .github/workflows/*.yml >/dev/null 2>&1 \
+    && ko "  a workflow runs on GitHub's runners — every job must use runs-on: ${CI_RUNNER}" \
+    || ok "  CI runner: ${CI_RUNNER}${CI_SWITCH:+, on only while the variable $CI_SWITCH is 'on'}"
+fi
 if [ "$CI" = github ]; then
   grep -qs 'gates.sh ci' .github/workflows/*.yml 2>/dev/null && ok "  CI runs gates.sh ci" || ko "  no workflow runs \`bash scripts/agent/gates.sh ci\` — copy scripts/agent/ci/pr-quality-gates.yml over .github/workflows/pr-quality-gates.yml through /task"
+elif [ "$CI" = off ]; then
+  ls .github/workflows/*.yml >/dev/null 2>&1 && ko "  CI=off but .github/workflows/ still holds workflows — remove them (a public repo runs no CI)" || ok "  CI off: no workflows (public repo); checks run at commit and push"
 else
   ok "  CI contract not enabled (CI='')"
 fi

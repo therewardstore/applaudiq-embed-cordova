@@ -11,7 +11,7 @@ disagree, the skill wins.
 | pre-commit | the code rules on the staged lines (`scan-diff.sh --cached`) → the file cap (`bash scripts/git/check-file-cap.sh`) → `pnpm typecheck` | staged files, then the whole tree's types |
 | commit-msg | the branch ticket filled in (`prepare-commit-msg.sh`), then the header format, ticket match, no attribution trailers or bot identity (`check-commit-msg.sh`) | the message |
 | pre-push | branch name (`check-branch.sh`) → commits being pushed (`check-commit-range.sh`) → docs moved (`check-docs-moved.sh`) → `pnpm typecheck` → `pnpm build` → `pnpm run audit:deps` → audit exceptions (`audit-check.sh`) | the branch, new commits, then the tree |
-| CI | the `agent-gates` workflow: `bash scripts/agent/gates.sh ci` on the pull request HEAD with the BASE branch's policy, or its own when the base has no `ci` stage yet (branch, commits, secret scan, code rules, cap, docs, lint, types, the full suite, build, size, audit), then the merged result built and tested in `agent-gates-merged`; the AI review is manual (`trs-app ci review <pr>`) | a clean checkout |
+| CI | off (CI=off, a public repo): no workflow runs here, so the commit and push hooks are the only gates | a clean checkout |
 
 ## The lint gate
 
@@ -31,9 +31,7 @@ release fixes yet: its GHSA id goes in `pnpm.auditConfig.ignoreGhsas` and in a r
 (`AUDIT_EXCEPTION_MAX_DAYS`) and the reason it cannot reach users. A fix shipping, the date passing,
 a row missing or the package leaving the tree fails the gate, so the list only ever shrinks. A
 `pnpm.overrides` entry that crosses a breaking line needs a dated row of its own in the same file.
-`.github/workflows/dependency-audit.yml` runs the same check every Monday on the default branch
-and opens one issue (label `dependency-audit`) while it fails; `.github/dependabot.yml` raises the
-security updates. The audit needs the network, and a new advisory can turn it red on a branch whose
+The audit needs the network, and a new advisory can turn it red on a branch whose
 code did not change: that is still a push to hold, not a hook to skip.
 
 ## Ranges and exit codes
@@ -62,9 +60,11 @@ A change touching more than 2000 files against `master` is refused by
 
 ## CI from the terminal
 
-Two workflows: **PR quality gates** (`.github/workflows/pr-quality-gates.yml`) and **PR review (manual, AI)**
-(`.github/workflows/pr-review.yml`, started only by hand). One CLI over gh drives both (`--ref` defaults
-to the current branch; `--review` points status, cancel and rerun at the review):
+One workflow, **PR checks** (`.github/workflows/pr-quality-gates.yml`), holds every check, numbered so a PR reads
+in order: `1 · PR title` (`& description` in an Orbit workspace), `2 · Gates`, `3 · Gates on merged result`, in an
+Orbit workspace `4 · Orbit workspace gates` and `5 · Jira update` (it comments on the ticket once the checks pass), and
+the **Arivu 💡** review, started only by hand. One CLI over gh drives it (`--ref` defaults to the current
+branch; `--review` points status, cancel and rerun at the review's runs):
 
 | Command | What it does |
 |---|---|
@@ -72,7 +72,7 @@ to the current branch; `--review` points status, cancel and rerun at the review)
 | `trs-app ci status [--ref b]` | the branch's latest runs and the jobs of the newest |
 | `trs-app ci cancel [id] [--ref b] [--force]` | cancels the running runs; `--force` force-cancels one stuck in a post-cancel step |
 | `trs-app ci rerun [id] [--ref b] [--all-jobs]` | re-runs the failed jobs of the branch's latest failed run (every job with `--all-jobs`) |
-| `trs-app ci review <pr> [--model m] [--all]` | starts PR review (manual, AI) for that PR: `--model` haiku (default), sonnet, opus or fable; it needs the review secret |
+| `trs-app ci review <pr> [--since <sha>\|last] [--model m] [--all]` | starts the Arivu review: after a fix `--since last` reviews only the new commits, `--model` haiku (default), sonnet, opus or fable, `--all` every file; it needs the review secret |
 
 In an Orbit workspace `./orbit ci <verb> <repo>` does the same for any repo from `orbit/`.
 

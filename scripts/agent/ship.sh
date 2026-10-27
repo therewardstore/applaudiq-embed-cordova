@@ -98,8 +98,20 @@ else
       echo "### What changed"
       git log --reverse --format='- %s' "$(bash scripts/agent/gates.sh range 2>/dev/null || echo "origin/$base..HEAD")" 2>/dev/null
       echo
-      echo "### QA"
-      if [ -f "docs/qa/$key.md" ]; then echo "See \`docs/qa/$key.md\`."; else echo "No QA plan yet (/handoff)."; fi
+      # In an Orbit workspace the record holds Impact, QA and Rollback (/handoff writes QA there); orbit ship then
+      # adds the 📋 record block. Elsewhere the QA plan is docs/qa/<KEY>.md.
+      record_md="${ORBIT_ROOT:-$(git config --get orbit.root 2>/dev/null || true)}/.orbit/changes/$key.md"
+      if [ "$ORBIT" = 1 ] && [ -f "$record_md" ]; then
+        for part in "Impact:Impact / contracts" "QA:QA plan" "Rollback:Rollback"; do
+          echo "### ${part#*:}"
+          text="$(awk -v h="## ${part%%:*}" '$0 == h {on=1; next} /^## / {on=0} on' "$record_md" | sed '/<!--/,/-->/d' | sed '/^[[:space:]]*$/d')"
+          if [ -n "$text" ]; then echo "$text"; elif [ "${part%%:*}" = QA ]; then echo "No QA plan yet (/handoff)."; else echo "_none_"; fi
+          echo
+        done
+      else
+        echo "### QA"
+        if [ -f "docs/qa/$key.md" ]; then echo "See \`docs/qa/$key.md\`."; else echo "No QA plan yet (/handoff)."; fi
+      fi
     } > "$body"
     echo "▸ open the pull request"
     if [ "$dry" = 1 ]; then
@@ -119,7 +131,10 @@ fi
 # 3. Jira comment: printed for the agent to post through the Atlassian MCP (addCommentToJiraIssue).
 #    The marker carries the fingerprint, so a ticket that already has it gets no second comment.
 marker="[friday handoff $fingerprint]"
-if [ "$JIRA_COMMENT" = 1 ] && printf '%s' "$key" | grep -qE "^${TICKET_RE}$"; then
+# In an Orbit workspace check 5 of the PR checks posts and keeps the ticket comment once the checks pass.
+if [ "$ORBIT" = 1 ] && [ "$CI" = github ]; then
+  echo "▸ Jira: check 5 (Jira update) comments on $key once the PR checks pass; nothing to post by hand"
+elif [ "$JIRA_COMMENT" = 1 ] && printf '%s' "$key" | grep -qE "^${TICKET_RE}$"; then
   if step_done 'jira-comment:'; then
     echo "▸ Jira comment (recorded)"
   else
@@ -134,5 +149,5 @@ fi
 echo
 echo "Next"
 echo "  review the pull request: $pr_url"
-echo "  merge → the deploy follows ($([ "$CI" = github ] && echo 'CI agent-gates must be green' || echo 'no CI contract here')); rollback = redeploy the previous build or a revert PR"
+echo "  merge → the deploy follows ($([ "$CI" = github ] && echo 'the PR checks must be green' || echo 'no CI contract here')); rollback = redeploy the previous build or a revert PR"
 [ "$dry" = 0 ] || echo "  run the commands above by hand (TASK_PUSH=$TASK_PUSH$([ "$dry" = 1 ] && [ "$TASK_PUSH" = auto ] && echo ', --dry-run'))"
