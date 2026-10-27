@@ -1,6 +1,6 @@
 # Add to repositories_frontend_rulesets.tf in github-terraform (branch fe-no-delete-dev-master),
 # then `make plan` and `make apply`. A NEW ruleset: the existing protect-* rulesets stay as they are.
-# No bypass actors. Stage it after agent-gates has reported once on this repo.
+# No bypass actors. Stage it after check 2 (Gates) has reported once on this repo.
 resource "github_repository_ruleset" "fe_agent_gates_applaudiq_embed_cordova" {
   name        = "fe-agent-gates"
   repository  = github_repository.applaudiq_embed_cordova.name
@@ -22,10 +22,10 @@ resource "github_repository_ruleset" "fe_agent_gates_applaudiq_embed_cordova" {
       strict_required_status_checks_policy = true
       do_not_enforce_on_create             = true
       required_check {
-        context = "agent-gates"
+        context = "2 · Gates (lint, types, tests, build)"
       }
       required_check {
-        context = "agent-gates-merged"
+        context = "3 · Gates on merged result"
       }
     }
   }

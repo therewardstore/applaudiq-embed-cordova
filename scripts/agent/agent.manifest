@@ -1,6 +1,6 @@
-# scripts/agent/agent.manifest — what friday (trs-app 0.7.31) installed here.
+# scripts/agent/agent.manifest — what friday (trs-app 0.8.0) installed here.
 # Do not edit: a re-run of `trs-app agents upgrade` rewrites it and removes what it no longer ships.
-# version: 0.7.31
+# version: 0.8.0
 # playbook: v19 2026-10-16
 # owned
 .agents/rules/commits-and-branches.md
@@ -47,7 +47,6 @@
 .cursor/skills/task
 .github/workflows/dependency-audit.yml
 .github/workflows/pr-quality-gates.yml
-.github/workflows/pr-review.yml
 docs/GATES.md
 docs/TOOLS.md
 orbit.repo.json
@@ -102,15 +101,14 @@ scripts/git/doc-map.txt
 .cursor/rules/project.mdc 7a0f0d11971fb45afcf881bde3b8f516e4f28e699cb3aa1fb37a6d8bd3eabb9f
 .cursor/rules/skills.mdc 9f7535eb341248bbef635f3b2fa648d2f474fb7ee4b2bef4e180b10886f32c20
 .github/workflows/dependency-audit.yml 77dc6c9b7271282518088b3a514358464399881c256b53474cb90e5fa6dffa91
-.github/workflows/pr-quality-gates.yml e0f2807c7cf25feb20b92d37897cf3be2c5b44e45a203c81158079612ba02ce6
-.github/workflows/pr-review.yml 8175863e9b3f085766824663c7ebf0e598a64682d782a27389d66bf4c6c47277
-docs/GATES.md ef5f61c6a5e745e600456dd473b7cb8ad4c2797134159a2e7a88080f34240829
+.github/workflows/pr-quality-gates.yml 0609d3dfb6a80a6537985648a558291c53aaab6f79cbb545657ed9cc8bdfca10
+docs/GATES.md 2a8c53486078ac44812831989485a747f1bec8d477db2232a47c6e80f87a9d20
 docs/TOOLS.md 686b2dc777b3067492042adb0415a07fdc12bea7651cd31906297dc88d4451ef
 orbit.repo.json c1cb0341ca731425edc0a1905d1949b7858021de31919605d03206fe197c01f8
 scripts/agent/audit-check.sh 40a46450a53c0dc4bb03c21dae9553fc0d5133c9556164d2bdd07fa234e87f77
-scripts/agent/ci/fe-agent-gates.tf.example 06897ccfb326de2a9bebbd8f7bc7b0aa61a7b73ca360820154c8746d0abf79eb
+scripts/agent/ci/fe-agent-gates.tf.example cdfa2b746c5201da4851fe16a9aa64b9f365c04271cf0236970a398b8ce729fe
 scripts/agent/ci/orbit-hooks.example 46641ab023672da8e1ea8e8f648f62e27c424ffea657490b349a64b554ed4fd2
-scripts/agent/ci/pr-quality-gates.yml e0f2807c7cf25feb20b92d37897cf3be2c5b44e45a203c81158079612ba02ce6
+scripts/agent/ci/pr-quality-gates.yml 0609d3dfb6a80a6537985648a558291c53aaab6f79cbb545657ed9cc8bdfca10
 scripts/agent/doctor.sh 5b224282cb58e53fb1b1dfbf0b87fba481b1a202158d20261d5aa3d71506b43f
 scripts/agent/drift-check.sh 41bd15699c769cba2f5ce264299bebb58af9c5667f3da20e083628e864f9f821
 scripts/agent/env-check.sh ad3e8bd1b2d77a9dc9a4cd679dbc0d8acd1da28b143e9bc8ae1bbf42e52f109c
@@ -124,7 +122,7 @@ scripts/agent/qa-confirmed.sh b8d831d88228551cf87210fe134f42e8b53480dc2fbab254b5
 scripts/agent/review-rubric.md 6f5eb0e19fe0ac0ec60d003736487803edbedfd9bd1d10404012147acce73271
 scripts/agent/scan-diff.sh 3b97d9d413f316962680da1520a1b42ad4900fec6461e752c5bcac06c2cc42a4
 scripts/agent/session-check.sh c2898c262ed71adcccc59c508102614f8213f4369cf9b763760290d9470bc3af
-scripts/agent/ship.sh a3d77a9ab56d17c0af6a79d7dc9d5915d2e41f5da72c25e3d56f671ca7d84a0b
+scripts/agent/ship.sh 2c399b1d9025185c2ce7b7902ca7b09228d1e62b86da8cfe7f7c3fa2ca53b1fc
 scripts/agent/status.sh 074779db2383b519f2c0527fdd58bde7c25966982c8070c987e955c1a4c15dce
 scripts/agent/test-changed.sh b396cc93a5dbc0991a64dc141a0956339b8f181e070a025e21b30c7b88fe2ce4
 scripts/git/check-branch.sh e591a1d81ce7d30b7d31e33b48fe9d645841a44ca24c728bcbbdef2320a157f1
