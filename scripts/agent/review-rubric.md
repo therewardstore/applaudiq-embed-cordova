@@ -28,9 +28,13 @@ the diff.
    `postMessage` origin.
 10. **Accessibility.** Labels, focus order, contrast through tokens; an icon-only control has a name.
 
-Report shape:
+11. **Read, never guess.** A finding names what you read: the test that is missing from `pr/`, the DS
+    component in `docs/COMPONENTS.md` that should have been used, the helper that exists. A claim you cannot
+    verify from the files you have is not a finding; never write "cannot verify" or "the diff does not show".
 
-    ## review — <range | PR #n> · <n> files · <n> findings
+Report shape (the verdict is `ready` when there is no Must fix, else `needs-changes`):
+
+    ## review — <range | PR #n> · <n> files · <n> findings · verdict: <ready | needs-changes>
     Must fix
       <file>:<line>  <what is wrong> → <the fix>
     Worth a look

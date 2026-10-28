@@ -12,17 +12,22 @@
 # FRIDAY_<KEY> in the environment (hooks and CI only, each one logged) → a flag.
 
 # Every key, in agent.conf order. `trs-app agents status` and the env overrides read it.
-FRIDAY_CONF_KEYS='PM GATE_TYPES GATE_LINT GATE_TEST GATE_BUILD GATE_SIZE GATE_AUDIT TEST_FILES_CMD LINT_STAGED_CMD FILE_CAP FILE_CAP_CMD HOOKS TICKET_PREFIXES DEFAULT_BRANCH ROUTES_FILE ROUTES_FILE_RE ROUTES_HELPER API_FILES API_FILE_RE API_HELPER API_LITERAL_RE API_HELPER_CALL HELPER_STORAGE_FILES HELPER_ENV_FILES HELPER_NAVIGATION_FILES HELPER_API_FILES LINT_MAX_LINES LINT_MAX_LINES_PER_FUNCTION LANG_DIR MODULES_DIR DOCS_MODULES_DIR COVERAGE_MIN REQUIRE_OWN_TEST NOT_MEASURED_RE COMMENT_MAX_LINES COMMENT_MAX_LEN WIDTHS WARNING_CAP FLEET EXEMPT_IDENTITIES AUTOMATION_IDENTITIES ATTRIBUTION_BAN TICKET_DIGITS THEME_RULE THEME_BRIDGE_FILES REPO_NAME REPO_SLUG PRODUCTION_REF CI CI_WORKFLOWS TASK_MODE TASK_PUSH QA_CONFIRM JIRA_PROJECT JIRA_ISSUE_TYPE JIRA_COMMENT COMPONENT_REGISTRY DS_CANDIDATE_MAX_DAYS AUDIT_EXCEPTIONS AUDIT_EXCEPTION_MAX_DAYS ORBIT CI_TESTS TEST_SCOPE CI_RUNNER CI_SWITCH GATES_HOTFIX GATES_CHANGE GATES_NEW HOTFIX_RULES REVIEW_MODEL REVIEW_EFFORT BREAK_GLASS_IDENTITIES BREAK_GLASS_GATES SIZE_DELTA_MAX_PCT DEP_MAX_KB ASSET_MAX_KB GATE_DEADCODE GATE_DUPLICATES GATE_SECRETS GATE_A11Y GATE_SIZE_DELTA PERF_STRICT REVIEW_RULES REVIEW_STATUS BASELINE_EXPIRES CODEOWNERS_TEAM CONTRACT_REPO PROFILE'
+FRIDAY_CONF_KEYS='PM GATE_TYPES GATE_LINT GATE_TEST GATE_BUILD GATE_SIZE GATE_AUDIT TEST_FILES_CMD LINT_STAGED_CMD FILE_CAP FILE_CAP_CMD HOOKS TICKET_PREFIXES DEFAULT_BRANCH ROUTES_FILE ROUTES_FILE_RE ROUTES_HELPER API_FILES API_FILE_RE API_HELPER API_LITERAL_RE API_HELPER_CALL HELPER_STORAGE_FILES HELPER_ENV_FILES HELPER_NAVIGATION_FILES HELPER_API_FILES LINT_MAX_LINES LINT_MAX_LINES_PER_FUNCTION LANG_DIR MODULES_DIR DOCS_MODULES_DIR COVERAGE_MIN REQUIRE_OWN_TEST NOT_MEASURED_RE COMMENT_MAX_LINES COMMENT_MAX_LEN WIDTHS WARNING_CAP FLEET EXEMPT_IDENTITIES AUTOMATION_IDENTITIES ATTRIBUTION_BAN TICKET_DIGITS THEME_RULE THEME_BRIDGE_FILES REPO_NAME REPO_SLUG PRODUCTION_REF CI CI_WORKFLOWS TASK_MODE TASK_PUSH QA_CONFIRM JIRA_PROJECT JIRA_ISSUE_TYPE JIRA_COMMENT COMPONENT_REGISTRY DS_CANDIDATE_MAX_DAYS AUDIT_EXCEPTIONS AUDIT_EXCEPTION_MAX_DAYS ORBIT CI_TESTS TEST_SCOPE CI_RUNNER CI_SWITCH CI_SWITCH_OFF GATES_HOTFIX GATES_CHANGE GATES_NEW HOTFIX_RULES REVIEW_MODEL REVIEW_EFFORT BREAK_GLASS_IDENTITIES BREAK_GLASS_GATES SIZE_DELTA_MAX_PCT DEP_MAX_KB ASSET_MAX_KB GATE_DEADCODE GATE_DUPLICATES GATE_SECRETS GATE_A11Y GATE_SIZE_DELTA PERF_STRICT REVIEW_RULES REVIEW_STATUS BASELINE_EXPIRES CODEOWNERS_TEAM CONTRACT_REPO PROFILE'
 
 friday_load_conf() {
   local here
   here="$(cd "$(dirname "$1")" && pwd)"
   FRIDAY_ROOT="$(cd "$here/../.." && pwd)"
   cd "$FRIDAY_ROOT" || return 1
+  # The conf is shell, and its CI key would overwrite the runner's own CI=true for every tool a gate starts
+  # (vitest, pnpm, husky all read it): the conf's value is kept as FRIDAY_CONF_CI and the environment's restored.
+  local env_ci="${CI-__unset__}"
   if [ -f scripts/agent/agent.conf ]; then
     # shellcheck disable=SC1091
     . scripts/agent/agent.conf
   fi
+  FRIDAY_CONF_CI="${CI-}"; export FRIDAY_CONF_CI
+  if [ "$env_ci" = __unset__ ]; then unset CI; else CI="$env_ci"; fi
   # `${VAR=default}` without the colon: an EMPTY value in the conf is a stage
   # this repo does not have and must survive; only an unset key gets a default.
   : "${FRIDAY_AGENTS_VERSION=0}"
@@ -88,9 +93,10 @@ friday_load_conf() {
   : "${AUDIT_EXCEPTION_MAX_DAYS=90}"
   : "${ORBIT=0}"
   : "${CI_TESTS=0}"
-  : "${TEST_SCOPE=related}"
+  : "${TEST_SCOPE=full}"
   : "${CI_RUNNER=trs-runner-01}"
   : "${CI_SWITCH=}"
+  : "${CI_SWITCH_OFF=fail}"
   : "${GATES_HOTFIX=low}"
   : "${GATES_CHANGE=medium}"
   : "${GATES_NEW=high}"
@@ -126,18 +132,30 @@ friday_load_conf() {
   export FRIDAY_ROOT TICKET_RE TICKET_HUMAN TICKET_DIGITS_HUMAN BOT_IDENT_RE REPO_NAME PRODUCTION_REF
 }
 
-# FRIDAY_<KEY> overrides a conf key — only when gates.sh exported FRIDAY_ENV_OVERRIDES=1
-# (a hook or CI run), and each override is said out loud once per run.
+# FRIDAY_<KEY> overrides a conf key — only when gates.sh exported FRIDAY_ENV_OVERRIDES=1 (a hook or CI run)
+# AND the run is a break-glass one (FRIDAY_BREAK_GLASS=<TICKET> <reason>, which gates.sh checks against
+# BREAK_GLASS_IDENTITIES and logs). Without break-glass an override is refused out loud: the gates are not
+# a setting a shell can turn off. In CI there is never a break-glass, so an override is never honoured there.
 friday_apply_env_overrides() {
   [ "${FRIDAY_ENV_OVERRIDES:-}" = 1 ] || return 0
-  local key val
+  local key val spoke=0
   for key in $FRIDAY_CONF_KEYS; do
     eval "val=\${FRIDAY_${key}-__unset__}"
     [ "$val" = __unset__ ] && continue
+    if [ "${FRIDAY_BREAK_GLASS_OK:-}" != 1 ] || [ -n "${FRIDAY_CI_EVENT:-}" ]; then
+      # gates.sh sets FRIDAY_BREAK_GLASS_OK once the break-glass identity checked out; until then stay quiet
+      # when a break-glass is pending, and say why the override is refused when there is none.
+      if [ -z "${FRIDAY_BREAK_GLASS:-}" ] || [ -n "${FRIDAY_CI_EVENT:-}" ]; then
+        [ "${FRIDAY_QUIET_OVERRIDES:-}" = 1 ] || { echo "✖ FRIDAY_$key is set but ignored: a gate override needs FRIDAY_BREAK_GLASS=<TICKET> <reason> by a listed developer (never in CI)" >&2; spoke=1; }
+      fi
+      continue
+    fi
     eval "$key=\$val"
-    [ "${FRIDAY_QUIET_OVERRIDES:-}" = 1 ] || echo "▸ $key overridden by FRIDAY_$key for this run" >&2
+    [ "${FRIDAY_QUIET_OVERRIDES:-}" = 1 ] || { echo "▸ $key overridden by FRIDAY_$key for this run (break-glass ${FRIDAY_BREAK_GLASS%% *})" >&2; spoke=1; }
   done
-  export FRIDAY_QUIET_OVERRIDES=1
+  # Said once per run: the child scripts inherit the quiet flag only after the decision was spoken.
+  [ "$spoke" = 1 ] && export FRIDAY_QUIET_OVERRIDES=1
+  return 0
 }
 
 # friday_audit <line>: one line to the repo's audit log, and to the workspace's when ORBIT_ROOT is set.
@@ -192,12 +210,24 @@ friday_exempt_pusher() {
 friday_exempt_author() {
   [ -n "$EXEMPT_IDENTITIES" ] || return 1
   if [ -n "${FRIDAY_CI_EVENT:-}" ]; then
-    friday_is_listed "$EXEMPT_IDENTITIES" "" "" "$(friday_login_of "$2")"
+    # A commit email is whatever its author typed; the GitHub actor (FRIDAY_CI_ACTOR) is not. Both must match.
+    friday_is_listed "$EXEMPT_IDENTITIES" "" "" "$(friday_login_of "$2")" \
+      && friday_is_listed "$EXEMPT_IDENTITIES" "" "" "${FRIDAY_CI_ACTOR:-}"
     return
   fi
   friday_is_listed "$EXEMPT_IDENTITIES" "$1" "$2" "$(git config github.user 2>/dev/null || true)"
 }
-friday_is_automation() { friday_is_listed "$AUTOMATION_IDENTITIES" "$1" "$2"; }
+# Automation (dependabot, renovate, github-actions) is keyed the same way: in CI only the verified noreply login
+# counts, so `git -c user.name='dependabot[bot]'` on a laptop does not skip the rules once the commit reaches CI.
+friday_is_automation() {
+  if [ -n "${FRIDAY_CI_EVENT:-}" ]; then
+    # The noreply email can be typed by anyone; the GitHub actor who opened the PR cannot. Both must be a bot.
+    friday_is_listed "$AUTOMATION_IDENTITIES" "" "" "$(friday_login_of "$2")" \
+      && friday_is_listed "$AUTOMATION_IDENTITIES" "" "" "${FRIDAY_CI_ACTOR:-}"
+    return
+  fi
+  friday_is_listed "$AUTOMATION_IDENTITIES" "$1" "$2"
+}
 
 # ── ranges ───────────────────────────────────────────────────────────────────
 # friday_resolve <rev>: the commit sha, or exit 2 with the name of what is unknown.
@@ -254,11 +284,17 @@ friday_check_range() {
 }
 
 # friday_commits <a>..<b>: the commits subject to the message and identity rules. At pre-push
-# (FRIDAY_UNPUSHED_ONLY=1) a commit already on a remote branch was judged when it went there.
+# (FRIDAY_UNPUSHED_ONLY=1) a commit already on the remote's integration or production branch was judged by the
+# pull request that merged it; a commit on any other remote branch (a temp branch pushed with --no-verify) is not.
 friday_commits() {
   friday_check_range "$1" || return 2
   if [ "${FRIDAY_UNPUSHED_ONLY:-}" = 1 ]; then
-    git rev-list --reverse --no-merges "$1" --not --remotes || { echo "✖ git rev-list $1 failed" >&2; return 3; }
+    local judged="" ref
+    for ref in "refs/remotes/origin/$DEFAULT_BRANCH" "refs/remotes/origin/${PRODUCTION_REF:-}"; do
+      [ -n "${ref##*/}" ] && git show-ref -q --verify "$ref" 2>/dev/null && judged="$judged $ref"
+    done
+    # shellcheck disable=SC2086
+    git rev-list --reverse --no-merges "$1" --not $judged || { echo "✖ git rev-list $1 failed" >&2; return 3; }
   else
     git rev-list --reverse --no-merges "$1" || { echo "✖ git rev-list $1 failed" >&2; return 3; }
   fi

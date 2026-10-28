@@ -1,6 +1,6 @@
-# scripts/agent/agent.manifest — what friday (trs-app 0.11.0) installed here.
+# scripts/agent/agent.manifest — what friday (trs-app 0.12.1) installed here.
 # Do not edit: a re-run of `trs-app agents upgrade` rewrites it and removes what it no longer ships.
-# version: 0.11.0
+# version: 0.12.1
 # playbook: v19 2026-10-16
 # owned
 .agents/rules/commits-and-branches.md
@@ -61,6 +61,7 @@ scripts/agent/lib.sh
 scripts/agent/playbook-version
 scripts/agent/prompt-check.sh
 scripts/agent/qa-confirmed.sh
+scripts/agent/review-payload.mjs
 scripts/agent/review-rubric.md
 scripts/agent/scan-diff.sh
 scripts/agent/session-check.sh
@@ -99,23 +100,24 @@ docs/GATES.md bd70176dfb8bfa5a0692458a71e69ea77cf65a8c9f3be4981f07156d84555652
 docs/TOOLS.md 686b2dc777b3067492042adb0415a07fdc12bea7651cd31906297dc88d4451ef
 orbit.repo.json c1cb0341ca731425edc0a1905d1949b7858021de31919605d03206fe197c01f8
 scripts/agent/audit-check.sh 40a46450a53c0dc4bb03c21dae9553fc0d5133c9556164d2bdd07fa234e87f77
-scripts/agent/doctor.sh 19c01a451c12a0d2d7c64282eb0e5fc335c22c3487135a7897313ee0c44775ae
+scripts/agent/doctor.sh 7cdc5022fe33de2247e2cc8c2463d3e12bf0cf38eb05d5fea976fc13c2bdc5cf
 scripts/agent/drift-check.sh d04898c9a36edff5ab578f80a9ae05ee6605a9dcfb3a5259c9379747dddee90e
 scripts/agent/env-check.sh ad3e8bd1b2d77a9dc9a4cd679dbc0d8acd1da28b143e9bc8ae1bbf42e52f109c
 scripts/agent/fingerprint.sh 45c086830eb7e7e02dff1bf9913d7ecdc57ad9f7ea66ebbc26b5f7c57064cd94
-scripts/agent/gates.sh a4e127b0f51b561ae4300bea2d6917e8ed770f798b61d6cdb051a57bf24ac660
+scripts/agent/gates.sh 30a8eba37ac86004ac1193eaa47c3043f6f537b8870e10bbad8e510525e4650f
 scripts/agent/guard-shell.sh 539842a7c688c7b36abdd5984759b2c95f95a9ca665f234dce5c394cacc9ea77
-scripts/agent/lib.sh b295eaf7f72220c536a0ce4318e07b776ebaf0cf30c60444cd69bc45654dc9a3
+scripts/agent/lib.sh 61ac7ea500c870c6f56fe8767b18e07030b9a0dd1e48523af6df10af4e8cd831
 scripts/agent/playbook-version f9d4d808da198f758443a1d426e4fcf1c0ba6f7928ad645a40415c9679ce20d0
 scripts/agent/prompt-check.sh facc21610e403e7d31a256199729736715e3ec67fc172ce8ec5b945b0a5e6d26
 scripts/agent/qa-confirmed.sh b8d831d88228551cf87210fe134f42e8b53480dc2fbab254b5c6075879d3899d
-scripts/agent/review-rubric.md 6f5eb0e19fe0ac0ec60d003736487803edbedfd9bd1d10404012147acce73271
+scripts/agent/review-payload.mjs 8728711e34f5ec9c16502a406a2542761b178dd6122e90b5e8a3154020632743
+scripts/agent/review-rubric.md 5431d1530c4ef68c991c635329470db157eb778d29a891d71416546b0a87cc8a
 scripts/agent/scan-diff.sh 3b97d9d413f316962680da1520a1b42ad4900fec6461e752c5bcac06c2cc42a4
 scripts/agent/session-check.sh c2898c262ed71adcccc59c508102614f8213f4369cf9b763760290d9470bc3af
-scripts/agent/ship.sh 2c399b1d9025185c2ce7b7902ca7b09228d1e62b86da8cfe7f7c3fa2ca53b1fc
+scripts/agent/ship.sh f23b2bc7cc7ac9d2c7e54c061a1cc948ea40fd4359b910ce5cbb7700e07f9b61
 scripts/agent/status.sh 074779db2383b519f2c0527fdd58bde7c25966982c8070c987e955c1a4c15dce
 scripts/agent/test-changed.sh 26043e555aaa2222952454bf31087307eaaeb5efa2867b0568d0115d231ed415
-scripts/git/check-branch.sh e591a1d81ce7d30b7d31e33b48fe9d645841a44ca24c728bcbbdef2320a157f1
+scripts/git/check-branch.sh 3633ebcda31e1a3ed9437b3f8fb5b9e235433f3d225ff87a9701cf7e96d954f3
 scripts/git/check-commit-msg.sh 2dcde848f04c8ece20ed543f5719e3fbf8cef1e34c5f6d176db372eca7db96e6
 scripts/git/check-commit-range.sh 7d4b519c430628070c094dad6ddb701649668f092acba7ee3c059a49a0f69a36
 scripts/git/check-docs-moved.sh 3a53a5f0bffce9ffb1a4c324a5e81f79b753ccc687ff51bc41b70d746ae59e41
