@@ -25,7 +25,7 @@ verdict_line() {
   if [ "$rc" -eq 0 ]; then echo "::friday::verdict status=pass stage=$stage"; else echo "::friday::verdict status=fail stage=$stage exit=$rc"; fi
 }
 trap 'rc=$?; eval "$FRIDAY_CLEANUP"; verdict_line $rc' EXIT
-# A hook or CI run honours FRIDAY_<KEY> overrides (each one logged); a hand-run stage never does.
+# A FRIDAY_<KEY> override counts only under a break-glass by a listed developer (below), never in CI or by hand.
 case "$stage" in
   pre-commit|pre-push|ci) export FRIDAY_ENV_OVERRIDES=1; friday_load_conf "$0" ;;
 esac
@@ -52,6 +52,12 @@ if [ -n "${FRIDAY_BREAK_GLASS:-}" ]; then
       fi
       ;;
   esac
+fi
+# A FRIDAY_<KEY> override counts only inside a break-glass by a listed developer; the conf was loaded before
+# that was known, so the overrides apply now, and every script this run starts sees the same decision.
+if [ -n "$break_glass" ]; then
+  export FRIDAY_BREAK_GLASS_OK=1
+  friday_apply_env_overrides
 fi
 # never_skipped <label>: the gates break-glass can never remove.
 never_skipped() {
@@ -95,7 +101,7 @@ gate() {
   if [ "$rc" -eq 0 ]; then gate_line "$label" pass $(( ($(date +%s) - t0) * 1000 )); return 0; fi
   gate_line "$label" fail $(( ($(date +%s) - t0) * 1000 ))
   case "$cmd" in
-    bash\ scripts/*) if [ "$rc" -ne 1 ]; then echo "✖ $label could not run (exit $rc): $cmd" >&2; exit "$rc"; fi ;;
+    *bash\ scripts/*) if [ "$rc" -ne 1 ]; then echo "✖ $label could not run (exit $rc): $cmd" >&2; exit "$rc"; fi ;;
   esac
   echo "✖ $label failed: $cmd" >&2
   exit 1
@@ -139,21 +145,23 @@ secrets_gate() {
     if [ "$range" = --staged ]; then
       gate "secret scan" "gitleaks git --no-banner --pre-commit --staged"
     else
-      gate "secret scan" "gitleaks git --no-banner --log-opts=\"$range\""
+      export FRIDAY_GATE_RANGE="$range"
+      gate "secret scan" 'gitleaks git --no-banner --log-opts="$FRIDAY_GATE_RANGE"'
     fi
   else
     echo "▸ secret scan: gitleaks not installed — CI is the net (brew install gitleaks)"
   fi
 }
-# The policy gates on one committed range, in the pre-push order.
+# The policy gates on one committed range, in the pre-push order. The branch and the range reach each gate
+# through the environment, expanded by the gate itself: a branch name is never part of a shell string.
 range_gates() {
-  local branch="$1" range="$2"
-  gate "branch name" "bash scripts/git/check-branch.sh \"$branch\""
-  gate "commits being pushed" "bash scripts/git/check-commit-range.sh \"$branch\" $range"
-  secrets_gate "$range"
-  gate "code rules on the range" "bash scripts/agent/scan-diff.sh $range"
-  gate "file cap" "bash scripts/git/check-file-cap.sh $range"
-  gate "docs moved with the code" "bash scripts/git/check-docs-moved.sh $range"
+  export FRIDAY_GATE_BRANCH="$1" FRIDAY_GATE_RANGE="$2"
+  gate "branch name" 'bash scripts/git/check-branch.sh "$FRIDAY_GATE_BRANCH"'
+  gate "commits being pushed" 'bash scripts/git/check-commit-range.sh "$FRIDAY_GATE_BRANCH" "$FRIDAY_GATE_RANGE"'
+  secrets_gate "$2"
+  gate "code rules on the range" 'bash scripts/agent/scan-diff.sh "$FRIDAY_GATE_RANGE"'
+  gate "file cap" 'bash scripts/git/check-file-cap.sh "$FRIDAY_GATE_RANGE"'
+  gate "docs moved with the code" 'bash scripts/git/check-docs-moved.sh "$FRIDAY_GATE_RANGE"'
 }
 
 case "$stage" in
@@ -188,12 +196,14 @@ case "$stage" in
       case "$remote_ref" in refs/heads/*) ;; *) continue ;; esac
       branch="${remote_ref#refs/heads/}"
       pushed=""
-      if ! printf '%s\n' "$remote_sha" | grep -qE "$zero" && git cat-file -e "$remote_sha^{commit}" 2>/dev/null; then
-        pushed="$remote_sha"
+      if ! printf '%s\n' "$remote_sha" | grep -qE "$zero"; then
+        # The remote tip may not be fetched yet: fetch it, so the range is what the remote will see.
+        git cat-file -e "$remote_sha^{commit}" 2>/dev/null || git fetch -q "${FRIDAY_PUSH_REMOTE:-origin}" "$remote_sha" 2>/dev/null || true
+        git cat-file -e "$remote_sha^{commit}" 2>/dev/null && pushed="$remote_sha"
       fi
-      if [ -z "$pushed" ] && [ "$branch" = "$DEFAULT_BRANCH" ]; then
-        # The one push allowed to the default branch: the one that creates it on
-        # the remote. It carries the scaffold commit, which has no ticket.
+      if printf '%s\n' "$remote_sha" | grep -qE "$zero" && [ "$branch" = "$DEFAULT_BRANCH" ]; then
+        # The one push allowed to the default branch: the one that creates it on the remote (its sha is all
+        # zeros). It carries the scaffold commit, which has no ticket. A tip that merely was not fetched is not that.
         echo "▸ creating $branch on the remote: branch and commit checks skipped this once"
         continue
       fi
@@ -202,19 +212,25 @@ case "$stage" in
       fi
       range="$(friday_range "$local_sha" "$pushed")" || exit 1
       echo "▸ $branch: $range"
-      onremote="$(git rev-list --count --no-merges "$range" 2>/dev/null)"
-      onremote=$((onremote - $(git rev-list --count --no-merges "$range" --not --remotes 2>/dev/null || echo 0)))
-      [ "$onremote" -gt 0 ] && echo "▸ $onremote commit(s) already on a remote branch: judged when they went there, not again"
+      # Commits already merged into the remote integration or production branch were judged by their PR; every
+      # other commit in the range is checked, including one that reached a temp branch without the hooks.
       export FRIDAY_UNPUSHED_ONLY=1
       range_gates "$branch" "$range"
       unset FRIDAY_UNPUSHED_ONLY
       ranges="$ranges"$'\n'"$range"
     done < "$refs"
     tree_gates
-    while read -r range; do
-      [ -z "$range" ] && continue
-      gate "$( [ "${TEST_SCOPE:-own}" = related ] && echo "changed files' tests (own + related)" || echo "changed files' own tests")" "bash scripts/agent/test-changed.sh $range"
-    done <<< "$ranges"
+    # TEST_SCOPE=full: the whole suite once per push (CI runs no tests, so this is where all of them run);
+    # own/related: only the tests of what each pushed range changed.
+    if [ "${TEST_SCOPE:-full}" = full ]; then
+      full_tests
+    else
+      while read -r range; do
+        [ -z "$range" ] && continue
+        export FRIDAY_GATE_RANGE="$range"
+        gate "$( [ "$TEST_SCOPE" = related ] && echo "changed files' tests (own + related)" || echo "changed files' own tests")" 'bash scripts/agent/test-changed.sh "$FRIDAY_GATE_RANGE"'
+      done <<< "$ranges"
+    fi
     release_gates
     orbit_chain pre-push "$refs"
     ;;
@@ -278,7 +294,8 @@ case "$stage" in
       fp="$(bash scripts/agent/fingerprint.sh)" || exit 3
       short="$(bash scripts/agent/fingerprint.sh --short)"
       echo "▸ proposed commit: $(git diff --cached --name-only | wc -l | tr -d ' ') files · fingerprint $short"
-      gate "branch name" "bash scripts/git/check-branch.sh \"$branch\""
+      export FRIDAY_GATE_BRANCH="$branch"
+      gate "branch name" 'bash scripts/git/check-branch.sh "$FRIDAY_GATE_BRANCH"'
       gate "code rules on the proposed commit" "bash scripts/agent/scan-diff.sh --cached"
       gate "file cap" "bash scripts/git/check-file-cap.sh --cached"
       gate "docs moved with the code" "bash scripts/git/check-docs-moved.sh --cached"
@@ -363,8 +380,8 @@ case "$stage" in
       range_gates "$branch" "$range"
     fi
     tree_gates
-    # CI_TESTS=0: the tests ran at push time (changed files and the files that import them), not here.
-    if [ "${CI_TESTS:-1}" = 1 ]; then full_tests; else echo "▸ tests: run at push time (pre-push, TEST_SCOPE=${TEST_SCOPE:-own}), not in CI"; fi
+    # CI_TESTS=0: the tests ran at push time (the whole suite with TEST_SCOPE=full), not here.
+    if [ "${CI_TESTS:-1}" = 1 ]; then full_tests; else echo "▸ tests: run at push time (pre-push, TEST_SCOPE=${TEST_SCOPE:-full}), not in CI"; fi
     release_gates
     ;;
   *)

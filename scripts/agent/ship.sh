@@ -132,7 +132,7 @@ fi
 #    The marker carries the fingerprint, so a ticket that already has it gets no second comment.
 marker="[friday handoff $fingerprint]"
 # In an Orbit workspace check 5 of the PR checks posts and keeps the ticket comment once the checks pass.
-if [ "$ORBIT" = 1 ] && [ "$CI" = github ]; then
+if [ "$ORBIT" = 1 ] && [ "$FRIDAY_CONF_CI" = github ]; then
   echo "▸ Jira: check 5 (Jira update) comments on $key once the PR checks pass; nothing to post by hand"
 elif [ "$JIRA_COMMENT" = 1 ] && printf '%s' "$key" | grep -qE "^${TICKET_RE}$"; then
   if step_done 'jira-comment:'; then
@@ -149,5 +149,5 @@ fi
 echo
 echo "Next"
 echo "  review the pull request: $pr_url"
-echo "  merge → the deploy follows ($([ "$CI" = github ] && echo 'the PR checks must be green' || echo 'no CI contract here')); rollback = redeploy the previous build or a revert PR"
+echo "  merge → the deploy follows ($([ "$FRIDAY_CONF_CI" = github ] && echo 'the PR checks must be green' || echo 'no CI contract here')); rollback = redeploy the previous build or a revert PR"
 [ "$dry" = 0 ] || echo "  run the commands above by hand (TASK_PUSH=$TASK_PUSH$([ "$dry" = 1 ] && [ "$TASK_PUSH" = auto ] && echo ', --dry-run'))"
