@@ -1,6 +1,6 @@
-# scripts/agent/agent.manifest — what friday (trs-app 0.12.1) installed here.
+# scripts/agent/agent.manifest — what friday (trs-app 0.12.2) installed here.
 # Do not edit: a re-run of `trs-app agents upgrade` rewrites it and removes what it no longer ships.
-# version: 0.12.1
+# version: 0.12.2
 # playbook: v19 2026-10-16
 # owned
 .agents/rules/commits-and-branches.md
