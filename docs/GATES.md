@@ -60,11 +60,25 @@ A change touching more than 2000 files against `master` is refused by
 
 ## CI from the terminal
 
-One workflow, **PR checks** (`.github/workflows/pr-quality-gates.yml`), holds every check, numbered so a PR reads
-in order: `1 · PR title` (`& description` in an Orbit workspace), `2 · Gates`, `3 · Gates on merged result`, in an
-Orbit workspace `4 · Orbit workspace gates` and `5 · Jira update` (it comments on the ticket once the checks pass), and
-the **Arivu 💡** review, started only by hand. One CLI over gh drives it (`--ref` defaults to the current
-branch; `--review` points status, cancel and rerun at the review's runs):
+**PR checks** (`.github/workflows/pr-quality-gates.yml`) holds every check, numbered so a PR reads in order:
+`1 · PR title` (`& description` in an Orbit workspace), `2 · Gates (security, build)`, `2a · Push receipt`, and in an
+Orbit workspace `3 · Orbit workspace gates` and `4 · Jira update` (it comments on the ticket once the checks pass).
+CI runs no lint, typecheck or tests: the 1 GiB runner cannot hold them, so they run at push time, and `2a` checks the
+note a passing pre-push leaves on the pushed commit (`refs/notes/friday-gates`). A push with the hooks off leaves none:
+`2a` fails and one PR comment (edited, never duplicated) asks for a push with the hooks on, and the Jira update waits.
+The receipt catches a skipped hook; it is not tamper-proof (anyone who can push can write a note). GitHub's **Update
+branch** as a merge keeps the receipt (the commit before it is judged); **Update branch → rebase** rewrites every commit,
+so push again from your machine after it.
+
+The **PR review** (`.github/workflows/pr-review.yml`) is the **Arivu 💡** review, never a required check:
+a PR comment whose
+first line is `/arivu review [--model haiku|sonnet|opus|fable] [--since last] [--all]` starts it, `/ci run` re-runs the
+PR checks; only org members' comments count, and 👀, then 🚀 or 😕, answer them. A comment runs the workflow as it is on
+the repo's default branch. Every bot write (titles, comments, reviews, issues, reactions) posts as **meet-arivu[bot]**
+when the org secrets `ARIVU_APP_ID` / `ARIVU_APP_PRIVATE_KEY` reach the repo, else as github-actions[bot].
+
+One CLI over gh drives both (`--ref` defaults to the current branch; `--review` points status, cancel and rerun at the
+review's runs):
 
 | Command | What it does |
 |---|---|
@@ -79,7 +93,8 @@ In an Orbit workspace `./orbit ci <verb> <repo>` does the same for any repo from
 ## Skipping a hook
 
 `git commit --no-verify` skips pre-commit and commit-msg; pre-push still re-checks every unpushed
-commit. `git push --no-verify` skips pre-push as well; after that only CI and review remain.
+commit. `git push --no-verify` skips pre-push as well: lint, typecheck and tests then run nowhere, and CI's
+`2a · Push receipt` fails the PR until a push with the hooks on.
 
 ## Running a hook twice
 

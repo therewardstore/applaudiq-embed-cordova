@@ -94,6 +94,11 @@ desktop 1440 · iPad landscape 1180 · iPad portrait 820 · mobile 390; `/finali
 
 - **Attribution trailers.** Agents add `Co-authored-by` by default; the commit-msg hook rejects an
   AI one, so keep attribution off in settings instead of fighting the hook.
+- **A new package.** `deps-check.mjs` fails one with an install script, a name one letter from a popular package or
+  a licence outside `DEPS_LICENSES`. Pick another package first; a reviewed need is a dated row in
+  `docs/DEPS-EXCEPTIONS.md`, or `pnpm.onlyBuiltDependencies` for an install script you have read.
+- **A key in the bundle.** Only public client keys belong in browser code: `build-scan.sh` fails a server secret
+  the bundler inlined. Move it behind the API; never allowlist it.
 - **A gate edited in the hook.** The hooks call `scripts/agent/gates.sh`; a gate changes in
   `scripts/agent/agent.conf` and `docs/GATES.md`, or the docs drift.
 <!-- repo-traps:start -->
