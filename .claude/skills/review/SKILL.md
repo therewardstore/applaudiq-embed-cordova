@@ -36,7 +36,8 @@ Mechanical lines (`✖`, `⚠`) are quoted, not re-derived. Everything below is 
 | A test that only mirrors the implementation | tests assert behaviour the user sees |
 | A doc the change makes wrong | module docs move with the code (`scripts/git/doc-map.txt`) |
 | Scope creep | files the ticket does not need; a second change hiding in the first |
-| A dependency added | the trailer says why, the size is known, nothing already in the tree does it |
+| A dependency added | the trailer says why, the size is known, nothing already in the tree does it; `deps-check.mjs` passed (no unreviewed install script, typo-squat name or licence outside `DEPS_LICENSES`), and any `docs/DEPS-EXCEPTIONS.md` row is dated and explained |
+| A secret-scan or build-scan finding | the value is rotated, never just deleted; an allowlist entry in `.gitleaks.toml` names one rule and one path, below friday's block |
 
 ## 3. Report in this shape, then stop
 
@@ -50,7 +51,7 @@ One line per finding, as the comment you would leave, with the exact place. At m
     Mechanical: <scan-diff summary line>
     Next
       /task <prompt that fixes the Must fix lines> | nothing to fix: /finalize
-      then ./orbit ship <KEY>; once the PR checks pass, the Arivu review: ./orbit ci review <repo> <pr>
+      then ./orbit ship <KEY>; once the PR checks pass, the Arivu review: a PR comment /arivu review, or ./orbit ci review <repo> <pr>
       (after a fix: --since last · --model haiku|sonnet|opus|fable · --all)
 
 ## Stop conditions

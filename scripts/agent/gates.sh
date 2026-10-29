@@ -118,6 +118,24 @@ orbit_chain() {
   else ORBIT_ROOT="$root" node "$root/bin/orbit.js" hook "$1" || exit $?; fi
 }
 
+# The push receipt: a note on each pushed tip in refs/notes/friday-gates, pushed beside the branch. CI no longer
+# runs lint, typecheck or tests, so it reads this note to know they ran here; a push with hooks off leaves none.
+push_receipt() {
+  local remote="${FRIDAY_PUSH_REMOTE:-origin}" who tip ref=refs/notes/friday-gates
+  who="$(git config user.email 2>/dev/null || echo unknown)"
+  git fetch -q "$remote" "+$ref:refs/notes/friday-gates-remote" 2>/dev/null || true
+  if git rev-parse -q --verify refs/notes/friday-gates-remote >/dev/null; then
+    git notes --ref=friday-gates merge -q -s cat_sort_uniq refs/notes/friday-gates-remote 2>/dev/null || true
+  fi
+  while read -r _l tip _r _s; do
+    [ -n "$tip" ] && ! printf '%s\n' "$tip" | grep -qE '^0+$' || continue
+    git notes --ref=friday-gates add -f -m "${1:-pass} $tip lint typecheck tests build audit $(date -u +%Y-%m-%dT%H:%MZ) $who" "$tip"
+  done < "$2"
+  FRIDAY_NOTES_PUSH=1 git push -q "$remote" "$ref" 2>/dev/null \
+    && echo "▸ push receipt: recorded for CI" \
+    || echo "▸ push receipt: could not push $ref; CI will ask for a re-push" >&2
+}
+
 # The whole-tree gates every push-shaped stage ends with, in one order.
 tree_gates() {
   gate "lint" "$GATE_LINT"
@@ -125,6 +143,10 @@ tree_gates() {
 }
 release_gates() {
   gate "build" "$GATE_BUILD"
+  # What ships is public: an .env value or a key the bundler inlined fails here (build-scan.sh, SOURCE_MAPS).
+  if [ -n "$GATE_BUILD" ] && [ "$BUILD_SCAN" = block ] && [ "$FRIDAY_CONF_CI" != off ]; then
+    gate "secrets in the build" "bash scripts/agent/build-scan.sh"
+  fi
   gate "size budgets" "$GATE_SIZE"
   gate "dependency audit" "$GATE_AUDIT"
   # Any severity counts; an ignored advisory must be an unfixed, dated exception (audit-check.sh).
@@ -162,6 +184,11 @@ range_gates() {
   gate "code rules on the range" 'bash scripts/agent/scan-diff.sh "$FRIDAY_GATE_RANGE"'
   gate "file cap" 'bash scripts/git/check-file-cap.sh "$FRIDAY_GATE_RANGE"'
   gate "docs moved with the code" 'bash scripts/git/check-docs-moved.sh "$FRIDAY_GATE_RANGE"'
+  # A package new to the lockfile is judged before any advisory exists for it (deps-check.mjs).
+  if [ "$DEPS_CHECK" = block ] && [ "$PM" = pnpm ] && [ "$FRIDAY_CONF_CI" != off ] && [ -f pnpm-lock.yaml ]; then
+    export DEPS_LICENSES DEPS_EXCEPTIONS AUDIT_EXCEPTION_MAX_DAYS
+    gate "new dependencies" 'node scripts/agent/deps-check.mjs "$FRIDAY_GATE_RANGE"'
+  fi
 }
 
 case "$stage" in
@@ -176,6 +203,8 @@ case "$stage" in
     orbit_chain pre-commit
     ;;
   pre-push)
+    # The receipt's own push (push_receipt): nothing to check, and no gates to run again.
+    [ -z "${FRIDAY_NOTES_PUSH:-}" ] || exit 0
     # The ref lines arrive on stdin, or in FRIDAY_PUSH_REFS when a chained hook
     # read stdin first. Each ref gets its own range: the commits it adds over the
     # target, so history already on the default branch is never judged again.
@@ -233,6 +262,9 @@ case "$stage" in
     fi
     release_gates
     orbit_chain pre-push "$refs"
+    # Last, once every gate passed: a push stopped by a later gate leaves no receipt. Under Orbit's shim (ORBIT_STAGE)
+    # Orbit's gates run after this script, so Orbit writes the receipt there.
+    [ -n "${ORBIT_STAGE:-}" ] || push_receipt "$( [ -n "$break_glass" ] && echo "break-glass-${break_glass%% *}" || echo pass)" "$refs"
     ;;
   task)
     # The /task gates on the working tree, cheapest first; the plan's risk adds
@@ -379,7 +411,8 @@ case "$stage" in
     else
       range_gates "$branch" "$range"
     fi
-    tree_gates
+    # The runner is too small for them; they run at push time, and CI checks the push receipt instead.
+    echo "▸ lint, typecheck: run at push time (pre-push), not in CI"
     # CI_TESTS=0: the tests ran at push time (the whole suite with TEST_SCOPE=full), not here.
     if [ "${CI_TESTS:-1}" = 1 ]; then full_tests; else echo "▸ tests: run at push time (pre-push, TEST_SCOPE=${TEST_SCOPE:-full}), not in CI"; fi
     release_gates

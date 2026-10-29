@@ -51,6 +51,9 @@ if [ "$automation" = 1 ]; then
   echo "▸ $an is automation: identity and header rules waived; the code gates still run" >&2
 elif printf '%s\n' "$header" | grep -qE '^(Merge (branch|remote-tracking branch|pull request) |Revert ")'; then
   :
+elif [ "$mode" = commit ] && git rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
+  # A merge being committed (two parents) whose message was edited: it adds no work of its own to name.
+  :
 elif printf '%s\n' "$header" | grep -qE '^(fixup|squash|amend)! '; then
   [ "$mode" = push ] && errors+=("\"$header\" is a fixup commit. Squash it before pushing: git rebase -i --autosquash")
 elif [ "$exempt" = 1 ] && ! printf '%s\n' "$header" | grep -qE "$header_re"; then

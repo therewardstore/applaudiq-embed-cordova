@@ -103,7 +103,9 @@ unrelated unstaged hunks is staged whole only on `whole`; otherwise stop and ask
 - `gh` not logged in → the PR link goes in `Next`. No Atlassian MCP → the printed comment goes in `Next`.
 - A gate that could not run (exit 2 or 3) is a failure to report, never a pass.
 - CI red or stuck → `trs-app ci status`, then `trs-app ci rerun` (the failed jobs) or `trs-app ci cancel
-  [--force]`; `trs-app ci run` starts PR quality gates by hand; `trs-app ci review <pr>` starts the manual AI review. Ask before cancelling a run you did not start.
+  [--force]`; `trs-app ci run` starts PR quality gates by hand; `trs-app ci review <pr>` (or a PR comment `/arivu review`)
+  starts the AI review, `/ci run` re-runs the PR checks. `2a · Push receipt` red = pushed with the hooks off: push again
+  with them on, never `--no-verify`. Ask before cancelling a run you did not start.
 
 ## Next for the developer — every run ends with it
 

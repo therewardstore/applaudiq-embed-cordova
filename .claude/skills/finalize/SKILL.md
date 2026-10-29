@@ -44,9 +44,9 @@ outside the approved set are listed, not graded.
 ## 2. What it runs, in order
 
 Branch name → the commits (header, ticket, no bot or AI identity, no AI attribution) → the secret
-scan → the code rules on the range → the file cap → docs moved with the code → `` →
-`pnpm typecheck` → the changed files' own tests → `pnpm build` → size budgets → the dependency
-audit (a stage the conf leaves empty is skipped with a notice: `pnpm typecheck` · `pnpm build` · `pnpm run audit:deps`).
+scan (`.gitleaks.toml`) → the code rules on the range → the file cap → docs moved with the code → the new
+dependencies (`deps-check.mjs`) → `` → `pnpm typecheck` → the changed files' own tests →
+`pnpm build` → secrets in the build (`build-scan.sh`) → size budgets → the dependency audit (a stage the conf leaves empty is skipped with a notice: `pnpm typecheck` · `pnpm build` · `pnpm run audit:deps`).
 Stop at the first failure and name it. A commit that predates the hooks and fails the header
 format is one failure with one fix (`git rebase -i`), never a reason to split anything.
 `⚠ suggestion:` lines from the commit check and `⚠` lines from scan-diff are advisory.
