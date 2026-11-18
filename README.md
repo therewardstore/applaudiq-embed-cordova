@@ -24,7 +24,7 @@ In a pnpm app, put `node-linker=hoisted` in its `.npmrc` before installing: the 
 npm cannot read pnpm's default (isolated) `node_modules`.
 
 ```bash
-pnpm add @applaudiq/embed-cordova@^1.3.0
+pnpm add @applaudiq/embed-cordova@^1.4.0
 cordova plugin add cordova-plugin-inappbrowser cordova-plugin-customurlscheme
 ```
 
@@ -138,7 +138,7 @@ A runnable example ships for each framework in
 [`applaudiq-sdk-example`](https://github.com/therewardstore/applaudiq-sdk-example) under
 `native-integration/cordova/` (vanilla · react · angular · vue · ionic-react · ionic-angular · ionic-vue).
 
-Latest: **v1.3.0 (LTS)**. See [CHANGELOG.md](./CHANGELOG.md). MIT licensed.
+Latest: **v1.4.0 (LTS)**. See [CHANGELOG.md](./CHANGELOG.md). MIT licensed.
 
 ## CI
 
