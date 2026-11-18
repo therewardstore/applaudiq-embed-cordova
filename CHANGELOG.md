@@ -5,6 +5,10 @@ All notable changes to `@applaudiq/embed-cordova` are documented here. This proj
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [1.4.0] — LTS
+
 **Security.** The bridge now accepts messages only from the embed iframe itself (`e.source`) on the exact
 portal origin; empty or `'null'` origins are rejected. The one-time `token` is no longer put in the embed
 URL — it is sent only by the `applaudiq:init-token` message. A plain-`http` localhost `baseUrl` now needs
