@@ -8,6 +8,7 @@ the package leaving the tree fails the gate. The goal is an empty table.
 
 | Advisory | Package | Until | Why it is safe until then |
 |---|---|---|---|
+| GHSA-fc5q-39xc-vjpf | picomatch <=4.0.7 | 2027-01-31 | ReDoS through repeated extglobs; no fixed release exists (4.0.7 is the latest). Reached only through build and release tooling: `pnpm why picomatch --prod` is empty, so it never ships in the SDK. Until then the code is patched locally with the fix proposed upstream (micromatch/picomatch#267): `patches/picomatch@4.0.7.patch`. Drop the row, the ignore and the patch when a fixed picomatch is published. |
 
 ## Overrides
 

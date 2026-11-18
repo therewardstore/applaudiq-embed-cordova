@@ -87,6 +87,8 @@ export interface EmbedConfig {
    * iframe history directly. Set false to keep the platform default and disable the iOS swipe.
    */
   backNavigation?: boolean;
+  /** DEV ONLY, default false: allow an http `baseUrl` on localhost/127.0.0.1/10.0.2.2. */
+  allowInsecureLocalhost?: boolean;
 }
 
 export interface OpenOptions {
@@ -250,21 +252,21 @@ function sameOrigin(a: string | null | undefined, b: string | null | undefined):
 }
 
 /**
- * The portal must be served over TLS. `http://` is allowed only for localhost-class hosts (dev).
- * Rejecting a plain-http `baseUrl` stops an attacker origin from hosting the embed.
+ * The portal must be served over TLS. `http://` is allowed only for localhost-class hosts, and only
+ * when the host opted in with `allowInsecureLocalhost` (dev). Mirrors RN's `__DEV__` gate.
  */
-function isSecureBaseUrl(url: string): boolean {
+function isSecureBaseUrl(url: string, allowInsecureLocalhost = false): boolean {
   const m = url.match(/^([a-z][a-z0-9.+-]*):\/\/([^/?#:]+)/i);
   if (!m) return false;
   const scheme = m[1].toLowerCase();
   const host = m[2].toLowerCase();
   if (scheme === 'https') return true;
   const localhost = host === 'localhost' || host === '127.0.0.1' || host === '10.0.2.2';
-  return scheme === 'http' && localhost;
+  return scheme === 'http' && localhost && allowInsecureLocalhost;
 }
 
 /**
- * `<baseUrl>/embed?mode={auto|manual}&k={key}` (+ `&native=1` on a native platform, `&token=` in auto,
+ * `<baseUrl>/embed?mode={auto|manual}&k={key}` (+ `&native=1` on a native platform,
  * `&sso_pending=1` on an SSO return, `&env=test` for pk_test_).
  * `native=1` tells the portal it's hosted in a native WebView so it skips reCAPTCHA on the manual-login page
  * (reCAPTCHA can't run in a WebView) and uses the server-minted captcha nonce instead. We send it only when
@@ -277,14 +279,13 @@ function buildEmbedUrl(
   mode: string,
   key: string,
   native: boolean,
-  token?: string,
   ssoPending?: boolean,
 ): string {
   const m = mode === 'manual' ? 'manual' : 'auto';
   let url = `${base}/embed?mode=${m}`;
   if (native) url += `&native=1`;
   if (key) url += `&k=${encodeURIComponent(key)}`;
-  if (m === 'auto' && token) url += `&token=${encodeURIComponent(token)}`;
+  // No `&token=`: the one-time token goes only via the `init-token` message, never in a logged URL.
   // SSO return: re-open the embed in resume mode so the portal exchanges the one-time SSO code we relay
   // (the iframe is on /login by now and can't be script-injected cross-origin). See handleOpenURL + ready below.
   if (ssoPending) url += `&sso_pending=1`;
@@ -408,8 +409,8 @@ class ApplaudIQClient {
     const render: RenderMode = options.render || 'fullscreen';
 
     // Refuse an insecure portal origin: the one-time token + session cookies must never travel over
-    // cleartext. HTTPS required; http tolerated only for a localhost-class dev portal.
-    if (!isSecureBaseUrl(this.base)) {
+    // cleartext. HTTPS required; http only for a localhost dev portal with allowInsecureLocalhost.
+    if (!isSecureBaseUrl(this.base, this.config.allowInsecureLocalhost === true)) {
       options.onError?.('insecure_base_url');
       return noop;
     }
@@ -424,7 +425,6 @@ class ApplaudIQClient {
       mode,
       this.config.key,
       this.isNative,
-      options.token,
       !!webSsoCode,
     );
     iframe.setAttribute('allow', 'clipboard-write; clipboard-read');
@@ -568,7 +568,7 @@ class ApplaudIQClient {
           // so we can't script-inject the exchange. Re-load the iframe in resume mode (`sso_pending=1`) and
           // relay the one-time code once it posts `ready` (see onMessage) — the portal then exchanges it.
           pendingSsoCode = code;
-          iframe.src = buildEmbedUrl(this.base, mode, this.config.key, this.isNative, undefined, true);
+          iframe.src = buildEmbedUrl(this.base, mode, this.config.key, this.isNative, true);
           return;
         }
         // SSO failed (e.g. the IdP email isn't an employee of this tenant). Notify the host AND show the
@@ -603,8 +603,8 @@ class ApplaudIQClient {
 
     // ── bridge: receive from the embed ───────────────────────────────────────────────────────
     const onMessage = (e: MessageEvent) => {
-      // Only the portal origin may drive the bridge.
-      if (e.origin && e.origin !== 'null' && !sameOrigin(e.origin, this.base)) return;
+      // Only OUR iframe on the exact portal origin may drive the bridge (no empty/'null' origin).
+      if (e.source !== iframe.contentWindow || !sameOrigin(e.origin, this.base)) return;
       const d = e.data as
         | { source?: string; type?: string; payload?: Record<string, unknown> }
         | null;

@@ -81,7 +81,8 @@ const embed = ApplaudIQ.init({ key: 'pk_live_…', ssoCallback: 'myapp://sso-cal
 | Option | |
 |---|---|
 | `config.key` | Publishable key (`pk_live_…`). Required, both modes. |
-| `config.baseUrl` | Portal origin. Defaults to the production portal. **HTTPS** in production. |
+| `config.baseUrl` | Portal origin. Defaults to the production portal. Must be **HTTPS** (else `onError('insecure_base_url')`). |
+| `config.allowInsecureLocalhost` | **Dev only**, default `false`. `true` allows an `http://` `baseUrl` on `localhost` / `127.0.0.1` / `10.0.2.2` for a local portal. Never ship it on. |
 | `config.ssoCallback` | Your app's `scheme://host` deep link (default `applaudiq://sso-callback`); sent as `native_redirect`. |
 | `config.backNavigation` | `true` (default): **Android** hardware Back + **iOS** left-edge swipe step back inside the embed (`onClose` at the root). `false`: platform default, no iOS swipe. See [Back navigation](#back-navigation). |
 | `mode` | `'auto'` (needs `token`) or `'manual'` (portal login). |
