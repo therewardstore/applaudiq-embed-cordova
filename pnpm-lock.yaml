@@ -9,11 +9,6 @@ overrides:
   esbuild: ^0.28.1
   undici@>=7.0.0 <7.29.1: ^7.29.1
 
-patchedDependencies:
-  picomatch@4.0.7:
-    hash: fnlbrrb45qmkfgxp4nnbyon4uy
-    path: patches/picomatch@4.0.7.patch
-
 importers:
 
   .:
@@ -1703,9 +1698,9 @@ snapshots:
     dependencies:
       fast-string-width: 3.0.2
 
-  fdir@6.5.0(picomatch@4.0.7(patch_hash=fnlbrrb45qmkfgxp4nnbyon4uy)):
+  fdir@6.5.0(picomatch@4.0.7):
     optionalDependencies:
-      picomatch: 4.0.7(patch_hash=fnlbrrb45qmkfgxp4nnbyon4uy)
+      picomatch: 4.0.7
 
   fix-dts-default-cjs-exports@1.0.1:
     dependencies:
@@ -1937,7 +1932,7 @@ snapshots:
 
   picocolors@1.1.1: {}
 
-  picomatch@4.0.7(patch_hash=fnlbrrb45qmkfgxp4nnbyon4uy): {}
+  picomatch@4.0.7: {}
 
   pirates@4.0.7: {}
 
@@ -2125,13 +2120,13 @@ snapshots:
 
   tinyglobby@0.2.15:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.7(patch_hash=fnlbrrb45qmkfgxp4nnbyon4uy))
-      picomatch: 4.0.7(patch_hash=fnlbrrb45qmkfgxp4nnbyon4uy)
+      fdir: 6.5.0(picomatch@4.0.7)
+      picomatch: 4.0.7
 
   tinyglobby@0.2.17:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.7(patch_hash=fnlbrrb45qmkfgxp4nnbyon4uy))
-      picomatch: 4.0.7(patch_hash=fnlbrrb45qmkfgxp4nnbyon4uy)
+      fdir: 6.5.0(picomatch@4.0.7)
+      picomatch: 4.0.7
 
   tree-kill@1.2.2: {}
 
